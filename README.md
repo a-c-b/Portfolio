@@ -14,3 +14,4 @@ This repo is created to organize a variety of Markdown files which are non-funct
 
 6)  Sample of Visual Basic
 
+7)  Sample of R code
