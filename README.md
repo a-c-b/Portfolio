@@ -2,7 +2,7 @@
 
 This repo is created to organize a variety of Markdown files which are non-functional demonstrations of the code I've written over the years as well as descriptions of the business problems I've addressed.
 
-1)  Documenting Metric Definition Code
+1)  [Documenting Metric Definition Code](Portfolio/Documenting Metric Code)
 
 2)  Sample of Oracle SQL statements / code
 
