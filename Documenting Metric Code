@@ -1,0 +1,159 @@
+---
+title: "Documenting Metrics Code in Oracle 12 databases"
+author: "Andrea Brice"
+date: "Tuesday, May 05, 2015"
+---
+
+
+Because of the quantity of metrics created across a variety of nodes, trying to manage the change in code even using a "GitHub" like system became problematic.  The problem of keeping the code up to date without human intervention becomes more imperative as multiple views can be changed several times during the introduction of new technology changes.  Manual updating is inherently structured for failure because of time constraints, "forgetfulness," or even just losing track of where code might be residing on a person's machine.
+
+The standard of writing code in Oracle views was the easiest way of tracking what code is production for metrics which needed to be accessed by various internal workgroups for reporting.  View code could be copied, queried, between production & non-production schema by users with the proper authority.  Non-production views could be written under a non-production owner and then migrated into the production owner's schema as part of a conscious integration.
+
+By leveraging the use of System Tables in both Oracle, and SQL Server databases, I was able to automate the process of updating the metrics database with the most recent code.  Even though code is changed multiple times a day, the last instance of change is what needed to be captured.  This last instance of the View code is available in System tables found in Oracle, SQL Server, and Teradata.  
+
+The system table structures break up the object from the object name and the text.  The text is stored in an Oracle system table which is a deprecated data type called, "data" if I remember correctly.  To be able to extract the view text from the sytem table it needed to be converted to a large object datatype - either LOB or CLOB.  I chose to convert it to CLOB because I did have a couple of views with > 32K characters (i.e., the view was written with > 32K characters) and I didn't want to run into a limit with LOB as the information passed from one database type to another.  
+
+The only way to convert from the data datatype to the CLOB datatype was to "insert into table".  Calling the data over into a new database, either Oracle, or SQLServer did not work.  I chose to append to the table because tracking changes could then be monitored on at least a daily basis.
+
+The primary Oracle system tables I used were "somewhat" consistent across databases.  While the table names were not the same, Oracle (12 & 10), SQL Server (2008), and Teradata (12) all had system tables which captured this information.  So I could "capture" my view code across all the databases.  SQL Server stored procedures can also be captured, but in a much more awkward manner, so I converted my stored procedures to Views and then used the scheduler to manage the sequence of my calls.
+
+
+The steps
+- update the table in database1 with new ddl dates & sql
+
+### create a table
+```{sql}
+create table schema.VIEW_LIST
+(
+DUMPDATE    DATE,
+OBJECT_ID    NUMBER,
+OWNER    VARCHAR2(10),
+OBJECT_NAME    VARCHAR2(50),
+OBJECT_TYPE    VARCHAR2(50),
+CREATED    DATE,
+STATUS    VARCHAR2(25),
+LAST_DDL_TIME    DATE,
+COLUMN_CT    NUMBER,
+TEXTLENGTH    NUMBER,
+TEXT    CLOB
+) tablespace tablespace_name
+```
+The system tables themselves contain only the last version of whatever's been written into the views.  This code snippet inserts the latest view code into the table which has the CLOB object "TEXT" to retain the actual code itself.
+```{sql}
+INSERT INTO VIEW_LIST
+     select
+        trunc(sysdate) as dumpdate,
+        a.object_id,
+        owner,
+        object_name,
+        object_type,
+        created,
+        status,
+        last_ddl_time,
+        cols as column_ct,
+        TEXTLENGTH, 
+        to_lob(TEXT) as text
+    from system.ALLOBJECTS a, system.VIEWS b
+    where a.object_id = b.obj#
+        and owner like '%SUBSTRING_SCHEMA_NAME'
+        and object_name not in ('Insert_Name1_Here', 'Name2', 'Name3')
+```
+This code snippet is just to use the last version of the code found in the new table with its CLOB field "Text".  This was used to begin the process of joining with information in other databases.  
+
+We were using a non-enterprise database to "hold" all the pulled code from the sources (Oracle for Performance data, Oracle for Configuration data, Oracle for others, Teradata for some other nodes, SQL Server for yet others).  This data was then prepped for the SQLServer database to pull in using T-SQL syntax (not 2012 version)
+
+```{sql}
+with
+latestdate as (select max(dumpdate) as latest_dumpdate from VIEW_LIST)
+       
+SELECT 
+    dumpdate
+    object_id,
+    owner||'.'||object_name as unique_id,
+    owner,
+        object_name,
+        object_type,
+        created,
+        status,
+        last_ddl_time,
+        column_ct,
+        TEXTLENGTH, 
+        text
+FROM VIEW_LIST, latestdate
+WHERE DUMPDATE = latest_dumpdate
+```
+I had "many" issues with the version of TSQL I was using.  Many of my Oracle View code exceeded 8,000 characters and T-SQL limits at 8K using OPENQUERY when I did.  So, I ended up breaking many of those views into smaller chunks just pulling them directly into the SQL Server.  
+
+```{tsql}
+ALTER VIEW [dbo].[V_DR_E_00_LAG_TRAFFIC] AS
+with 
+alldat as (select * FROM dbo.DR_E_800_LAG_TRAFF where NAME like '%WAN%')
+,PORTCT as (
+select DATETIME, E600, MGCF,
+		case when operate_status = 'up' then count(port) else 0 end as working_PORT_CT,
+		case when operate_status <> 'up' then COUNT(PORT) else 0 end as non_op_PORT_CT
+FROM alldat
+group by DATETIME, ERS8600, MGCF, operate_status
+		) SELECT * FROM LVL1
+,TRAFF as (
+    SELECT  
+			ReportWeekStart,
+			ReportWeekEnd,
+			ReportMonth,
+			DOW, 
+			Region, 
+			Market,
+			DATETIME, 
+			sum(IN_MBPS) as IN_MBPS,
+			sum(OUT_MBPS) OUT_MBPS,
+			sum(IN_MBPS)+sum(OUT_MBPS) AS TOT_MBPS,
+			case when sum(IN_MBPS) >= sum(OUT_MBPS) then sum(IN_MBPS)
+					else sum(OUT_MBPS) end as MAX_MBPS
+		FROM alldat 
+		group by DATETIME, DOW, MGCF, MGCF_TYPE,SWITCH_VERSION, SWITCH,
+			ReportWeekStart, ReportWeekEnd, ReportMonth, Region, Market
+			)
+			
+,CALCD AS (
+	select 
+		ReportWeekStart,ReportWeekEnd,ReportMonth,DOW, a.DATETIME, Region, Market, 
+			MGCF, SWITCH, MGCF_TYPE,SWITCH_VERSION,
+			b.working_PORT_CT,
+			b.non_op_PORT_CT,
+			TOTAL_PORTS,
+			SUMMED_SPEED_MBPS, 
+			OUT_OCTETS,
+			TOTAL_OCTETS,
+			IN_MBPS,
+			MAX_MBPS,
+			ROUND(12_MBPS/CAST(TESTY2Q AS FLOAT),4)*100 AS LAG_UTIL
+
+from TRAFF a, PORTCT b
+where a.DATETIME = b.DATETIME	and a.E600 = b.E600 and	a.SLOT = b.SLOT	
+)
+SELECT 				
+		ReportWeekStart, 
+		ReportWeekEnd, 
+		ReportMonth, 
+		DOW, datetime,
+		Region, Market, MGCF, SWITCH, MGCF_TYPE, SWITCH_VERSION, 
+		ERS8600, 
+		OAM_IP, SERVER_NAME, SLOT, working_PORT_CT, non_op_PORT_CT, 
+		total_PORTS, SUMMED_SPEED_MBPS, IN_OCTETS,
+		OUT_OCTETS, TOTAL_OCTETS, IN_MBPS, OUT_MBPS, TOT_MBPS, MAX_MBPS,
+		LAG_UTIL,
+CASE
+	WHEN LAG_UTIL = 0  THEN 0 
+	WHEN LAG_UTIL >0 AND LAG_UTIL <= 5 THEN 5   
+	WHEN LAG_UTIL >5 AND LAG_UTIL <= 10 THEN 10 
+	WHEN LAG_UTIL >10 AND LAG_UTIL <= 15 THEN 15 
+	WHEN LAG_UTIL >85 AND LAG_UTIL <= 90 THEN 90 
+	WHEN LAG_UTIL >90 AND LAG_UTIL <= 95 THEN 95
+	ELSE 100
+	END  AS UTIL_BUCKET	
+			FROM CALCD
+
+GO
+```
+Once all the code was pulled into the intermediate database, it was mapped to code from the pull from the Engineering Rules database and if code was found changed, then a flag was sent up so the new code could be loaded into the ERD.
+
