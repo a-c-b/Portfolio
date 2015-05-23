@@ -3,8 +3,7 @@ title: "Documenting Metrics Code in Oracle 12 databases"
 author: "Andrea Brice"
 date: "Tuesday, May 05, 2015"
 ---
-
-
+#  Purpose
 Because of the quantity of metrics created across a variety of nodes, trying to manage the change in code even using a "GitHub" like system became problematic.  The problem of keeping the code up to date without human intervention becomes more imperative as multiple views can be changed several times during the introduction of new technology changes.  Manual updating is inherently structured for failure because of time constraints, "forgetfulness," or even just losing track of where code might be residing on a person's machine.
 
 The standard of writing code in Oracle views was the easiest way of tracking what code is production for metrics which needed to be accessed by various internal workgroups for reporting.  View code could be copied, queried, between production & non-production schema by users with the proper authority.  Non-production views could be written under a non-production owner and then migrated into the production owner's schema as part of a conscious integration.
@@ -18,8 +17,15 @@ The only way to convert from the data datatype to the CLOB datatype was to "inse
 The primary Oracle system tables I used were "somewhat" consistent across databases.  While the table names were not the same, Oracle (12 & 10), SQL Server (2008), and Teradata (12) all had system tables which captured this information.  So I could "capture" my view code across all the databases.  SQL Server stored procedures can also be captured, but in a much more awkward manner, so I converted my stored procedures to Views and then used the scheduler to manage the sequence of my calls.
 
 
-The steps
-- update the table in database1 with new ddl dates & sql
+##The steps
+- build a table which will hold the appended View definitions
+- update the table in database1 with new ddl dates & sql, converting the data datatype to LOB datatype
+- database2 (Reporting Database) pulls the view code with the latest ddl date
+- Reporting Database(RD) pulls view code from other databases
+- RD joins view code from all sources 
+- RD pulls code from ERD
+- RD compares object IDs and notes changed text, flags new View code created.
+
 
 ### create a table
 ```{sql}
