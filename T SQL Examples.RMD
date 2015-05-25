@@ -1,0 +1,10 @@
+---
+title: "T SQL examples"
+author: "Andrea Brice"
+date: "Monday, May 25, 2015"
+output: html_document
+---
+
+I primarily used T-SQL to join multiple databases together as dblink authority was restricted based upon database - to - database connections.  My workgroup, as a national core reporting organization, had access to multiple dbs which might have granted access to each other.  We used our development server to cross the platforms in prep to send the final t-sql code to the reporting group.
+
+Originally, I was using stored procedures not just to pull data from one production database into the development server, but also creating & updating interim views or tables within that same stored procedure.  I changed this direction when I realized that documenting the code in the stored procedures was more difficult "to reach," than simply pulling the data into Views.  SQL Server system tables "documented" the view code.
