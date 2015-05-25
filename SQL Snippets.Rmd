@@ -4,7 +4,6 @@ author: "Andrea Brice"
 date: "Tuesday, May 19, 2015"
 
 ---
-
 #  Purpose
 The purpose of this document is to demonstrate my coding.  The schema, some of the logic, the names, and other pieces of information have been changed so the examples are non-functional.  They are here to show my knowledge of syntax and a little bit of the complexity of some of the work I've done.
 
@@ -19,7 +18,6 @@ This bit of code creates a view based off a dblinked connection to another datab
 Besides struggling with inconsistent reporting and a fixed date range to report by, I'm having to deal with inconsistent data types, character strings, and creating unique identifiers for key field creation.  Most of my work was around parsing and concatenating data from various fields:  datetimes parsed to days, or UTC calculated to PST, fields with text having a value parsed out to a new field, or multiple fields or fixed identities concatenated into a new unique id.
 
 I use row_number for the rank and partition by a variety of attributes.  In this case, the order is only by one attribute, but I do have queries where there are more than one attribute in both the partition and the order by statements of row_number.  I use row_number instead of rank because I don't want ties.  Most of my work would be impacted if I wanted only ten rows but eleven returned.  So, row_number is consistently used.
-
 
 Some of my older queries are straight nested statements.  More "modern" queries were nested "With" statements - until I had to migrate to SQL Server database.  Then there were restrictions on "With" statemented queries because of the call structure.  As we were not using 2012 SQL Server, I can't say that this restriction might have gone away.
 
@@ -125,9 +123,8 @@ CREATE OR replace FORCE VIEW MGW_LNG_MAP AS
             ON REGEXP_SUBSTR(a.MSC_LNG, '[[:alnum:]]+', 1, 1,'i') = OMSC;
 
 ```
+The code below parses both numeric and char data, joins data across multiple datamarts, multiple vendors, and converts across multiple datatypes - not just char to numeric, but dec to hex.  It then concatenates data to create multiple versions of the unique identifier in this view for future joining, ranking, and joining based on others' criteria as there are no standards.  This view, therefore, **becomes the standard.**
 
-Parsing both numeric and char data.  Also joining data across multiple datamarts, multiple vendors, converting across multiple datatypes - not just char to numeric,
-but dec to hex - concatenating data to create multiple versions for this view for future joining, ranking, and joining all this data into a new standardized, single view.
 ```{sql}
         create or replace view test.active_ID_INFO_base AS         
         with dates as (select         
@@ -142,6 +139,9 @@ but dec to hex - concatenating data to create multiple versions for this view fo
             ELEMENT_NAME as GS,
             ELEMENT_TYPE,
             SP_CODE_HD as original_data,
+            ```
+Honestly, sometimes it's just easier to use substring and instring instead of all the "specialized" syntax around regexp.  In the continuation of the syntax below, you see where I am doing both.  When I'm substringing SP_CODE_HD out to convert to a hex pointcode, I obviously found it easier to use the substring function instead of the regexp.  There are cases where REGEXP is more concise in its syntax, making for a shorter "line" of code, but obviously, not always, as is demonstrated below.         
+            ```{sql}
             substr(SP_CODE_HD,1,instr(SP_CODE_HD, '/',1,1)-1) as hex_pc,
             regexp_substr(SP_CODE_HD,'[^/]+',1,2) as  orig_pc
           from NO.ZNRI_GS_NET@otherdb, dates
@@ -157,8 +157,14 @@ but dec to hex - concatenating data to create multiple versions for this view fo
                 '' as e164,
                 original_data,        
                 hex_pc,
+                ```
+The following code converts a hex point code into decimal.  Then the next line, with the "replace" function, is converting after substringing and concatenating so the output with be a 3 character numeric code which looks like XXX-XXX-XXX.  I also created flavors with leading zeroes in case there address had only one or two characters.  I also ordered a dot based syntax, XXX.XXX.XXX and short syntaxes (i.e., no leading zeroes).  
+
+I also converted decimal to hex and hex to decimal so there would be a master look up table.  
+
+Null fields are added in each of these subqueries because the data will be joined at the end into the final view table.  Each of the subqueries operates and creates different parsed or concatenated unique fields.  For the UNION ALL call to work, however, each subquery has to have all the fields which will be referenced in the UNION ALL.
+                ```{sql}
                 to_number(hex_pc, 'XXXXXXXXXX') as decver_pc,
-                orig_pc,
                 replace(TO_CHAR(to_number(substr(hex_pc,1,2), 'XXX'),'099')||'-'||TO_CHAR(to_number(substr(hex_pc,3,2), 'XXX'),'099')||'-'||TO_CHAR(to_number(substr(hex_pc,5,2), 'XXX'),'099'),' ','') AS 
         dash_pc_long,
                 replace(TO_CHAR(to_number(substr(hex_pc,1,2), 'XXX'),'099')||'.'||TO_CHAR(to_number(substr(hex_pc,3,2), 'XXX'),'099')||'.'||TO_CHAR(to_number(substr(hex_pc,5,2), 'XXX'),'099'),' ','') AS dot_pc_long,
@@ -231,7 +237,9 @@ but dec to hex - concatenating data to create multiple versions for this view fo
                 hex_pc
             from E_pc a left join E_e164 b on a.GS= b.GS and a.dow = b.dow    
         )
-
+```
+Below is the final UNION ALL of all the subqueries above in the view test.active_ID_INFO_base.  
+```{sql}
     SELECT dow,GS,vendor,e164,dash_pc,dot_pc,dot_pc_long,dash_pc_long,decver_pc,hex_pc FROM NO_GS
     UNION ALL
     SELECT dow,GS,vendor,e164,dash_pc,dot_pc,dot_pc_long,dash_pc_long,decver_pc,hex_pc FROM ERIC
@@ -240,7 +248,9 @@ but dec to hex - concatenating data to create multiple versions for this view fo
 ```  
   
 ## Code Example #3 - Use of PIVOT to count records reporting to list of tables.
- Count the number of records, and / or nodes reporting over a date range using the PIVOT function </p>
+Count the number of records, and / or nodes reporting over a date range using the PIVOT function.  I used this method to test data stream health during user acceptance testing.  I commonly write code in Excel to concatenate repetitive syntax.  This is because I've never been given user authority to write stored procedures in the larger databases, so looping statements were disallowed as were other programmability features.  
+
+In the case of whole table adds being introduced to schema, I'd dump the new tables coming in from the Oracle system tables, then add their names (concatenating schema dot table_name into a unique identifier) to my little Excel workbook which has the "Select" syntax in it.  Once I have the syntax built, I'd save the snippet of code into a small text file and modify as required.  I rarely added this code into views.  There was no reason to.  This was a working / ad-hoc bit of code.
 
 ```{sql}
 
@@ -292,8 +302,7 @@ but dec to hex - concatenating data to create multiple versions for this view fo
 ```   
 
 ##  Example #4 Case statements
-Use of packages as well as case statements
-
+Use of packages as well as case statements.  Packages were created by people with higher permissions than I had, but they took requests as to which packages needed to be available.  In this case, it was an ErlangB package.  Results were checked between multiple Oracle databases.  
 
 ```{sql}
 --drop view no_msc /*
@@ -320,9 +329,7 @@ level_1 as (
             case when d.mgw_loc is null then 'LOCAL' else d.mgw_loc end as mgw_loc,
             nvl(d.GWINV_VSP_CARD_CT,0) as GWINV_VSP_CARD_CT, 
             nvl(d.IU_IP_CONTEXT,0) as IU_IP_CONTEXT,
-            nvl(i.NONA_CHANNELS,0) as NONA_CHANNELS, 
-            nvl(i.NONA_ERLANGS, 0) as NONA_ERLANGS, 
-            nvl(i.A_CHANNELS, 0) as A_CHANNELS, 
+          
             nvl(i.A_ERLANGS,0) as A_ERLANGS
             
      from all_rec c
@@ -330,8 +337,9 @@ level_1 as (
         left join ab.no_ANONA i on c.mgw_lo = i.MGW_lo
 ),
 LEVEL2 AS (
-
-
+```
+You will see a nested form of case in the code below:
+```{sql}
     select 
             case when aa.DOW is null then f.dow else aa.dow end as dow,
             o.region,
@@ -348,65 +356,17 @@ LEVEL2 AS (
                         case when sw_type = 'CA' then 'gG' else 'cG' END END end end as FUNCTION,                    
 
             o.MSC_FRIENDLY_NAME, 
-            o.NETOPTS_CLLI, 
-            o.POINT_CODE, 
-            o.VENDOR, 
             o.PROCESSOR,
-            
-            aa.MGW_lo,
-            aa.MGW_LOC,
-            
-            aa.GWINSP_CARD_CT,
-            nvl(n.SIPI_P_COUNT,0) as SIPI_P_COUNT,          
-   
-            aa.MGW_CONTEXT_CAP,
-            trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,aa.MGW_CONTEXT_CAP)) AS MGW_CTXT_TRAFF_CAP,
-            aa.MGW_PORT_EQUIVALENT,
-            
-            nvl(f.spm_dtc_eqpct_t1,0) as spm_dtc_t1,               
-            nvl(f.spm_dtc_eqpct_chnl,0)  as dtc_spm_chnl,   
-            trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,nvl(f.spm_dtc_eqpct_chnl,0))) AS SPM_DTC_EQM_TRAFF_CAP,
-            
-            aa.ATM_PVC_CT,
-            
-            aa.ALLOC_ATM_Contexts,
-            aa.IU_IP_CONTEXT,
-            nvl(n.SIPI_CTX_CAP,0) as sipi_context_cap,
-            aa.ALLOC_TXX_MGW_CONTEXTS, 
-
-                    
-            nvl(h.SPM_DTC_ALLOC_CHNL,0) as  SPM_DTC_ALLOC_CHNL,
-            aa.NONA_CHANNELS,
-            aa.A_CHANNELS,
-            aa.NONA_CHANNELS+aa.A_CHANNELS as alloc_TXX_chnl,
- 
- 
-            CASE WHEN aa.ALLOC_AT_Contexts= 0 THEN 0 
-                ELSE trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,aa.ALLOC_AT_Contexts)) END AS AT_TRAFF_CAP,
-         
-            CASE WHEN aa.NONA_CHANNELS= 0 THEN 0 
-                ELSE trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,aa.NONA_CHANNELS)) END as nona_traff_cap,    
-            CASE WHEN aa.A_CHANNELS = 0 THEN 0 
-                ELSE trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,aa.A_ELS)) END as afc_traff_cap,
-            CASE WHEN aa.NONNELS+aa.A_CNELS = 0 THEN 0 
-                ELSE trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,aa.NONA_CHAS+aa.ANNELS)) END as tot_TXX_traff_cap,               
-           
-            aa.A_RLAGS,
-            aa.NONA_RLNGS,
-            nvl(j.AT_ERL, 0) as aterl,
-            nvl(j.IP_ERL,0) as Ip_erl,
-            nvl(n.SIPRL,0) as sii_erl,
-             aa.ALANGS+aa.NONA_ERLANGS AS TXX_ERL,
-            nvl(n.SIERL,0)+ nvl(j.IU_ERL,0)+nvl(j.A_ERL, 0)+A_ERL+ NONNGS as tot_erl_traff,
-            
-            
-            trunc(ac.erlangb_package.ERLANGB_capacity(0.xxx,nvl(n.SIERL,0)+ nvl(j.IUERL,0)+nvl(j.ATMERL, 0)+aa.AEANGS+ aa.NOLANGS)) as revg_contexts,
-            
+            CASE WHEN aa.NONNS+aa.A_CNELS = 0 THEN 0 
+                ELSE trunc(ac.erl_package.ERL_OFFERED(0.xxx,aa.NONA_CHAS+aa.ANNELS)) END as tot_TXX_traff_cap,               
+            trunc(ac.erlangb_package.ERLANGapacity(0.xxx,nvl(n.SIERL,0)+ nvl(j.IUERL,0)+nvl(j.ATMERL, 0)+aa.AEANGS+ aa.NOLANGS)) as revg_contexts,
+    
             ROUND(ALLOC_TEXTS/24,0) AS IUPort_alloc, 
                   ROUND(nvl(n.SICTX_CAP,0)/24,0) AS sipirt_alloc,
             round(nvl(h.SPM_LLOC_CHNL,0)/24,0) as spm_d_alloc_t1                
-
-
+```
+Multiple left joins can cause severe system impacts.  This query timed out at over an hour to execute.  The report finally crossed four databases (3 oracle @ different versions, 1 SQL Server), > 20 source files, with > 30 view dependencies fishboning out to ~ 20 levels before the report output. 
+```{sql}
 from level_1 aa
 left join ab.no_MSC_NAME o on aa.CLLI||'-'||aa.MGW_LOC = o.msc_mgw_lo           
 left join ab.no_RFF_SUM j  on aa.mgw_lo = j.MGW_lo
@@ -418,50 +378,28 @@ SELECT
                 DOW,
                 region,
                 market,
-                CLLI, 
-                SWITCH, 
-                SWITCH_VER, 
-                SW_TYPE, 
-                NODE_TYPE, 
-                FUNCTION, 
-                MSC_FRIENDLY_NAME, 
-                NETOPTS_CLLI, 
-                POINT_CODE, 
-                VENDOR, 
-                PROCESSOR, 
-                MGW_lo, 
-
-                
-                GWINV_VSP_CARD_CT, 
-
-
+                NODE_TYSP_CARD_CT, 
                 MGW_PORT_EQUIVALENT, 
                 SPC_T1, 
-                
                 MG
                 spm_dtc_alloc_t1,                 
-  
                case when node_type = 'TXX' then MGW_PORT_EQUIVALENT+SPM_DTC_T1 
-                else MGW_PORT_EQUIVALENT+spm_dtc_alloc_t1 end as config_port_cap,
-                  QD_AVG_CONTEXTS,
-                
+                else MGALENT+s_t1 end as config_port_cap,
+                  QD_AVG_CXTS,
                 case when node_type = 'TXX' then MGW_CONTEXT_CAP+DTC_SPM_CHNL else
-                    MGW_CONTEXT_CAP+SPM_DTC_ALLOC_CHNL end as total_ctx_chnl_capacity,
-                    
+                    MGT_CAP+SPNL end as toacity,
                 case when node_type = 'TXX' 
                         then trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,MGW_CONTEXT_CAP+DTC_SPM_CHNL)) 
                         else trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,MGW_CONTEXT_CAP+SPM_DTC_ALLOC_CHNL)) end as total_traffic_capacity, 
                      
-                round(TOT_ERL_TRAFF/case when node_type = 'TXX' 
-                        then trunc(ac.erlangb_package.ERLANGB_OFFERED(0.xxx,MGW_CONTEXT_CAP+DTC_SPM_CHNL)) else
-            ROUND (A_ERLANGS / A_INTFC_TRAFF_CAP,3)*100 end AS a_intfc_resource_util,
---                CASE WHEN   NONA_TRAFF_CAP= 0 THEN 0 ELSE  ROUND ( NONA_
-                
-                
-                
-                FROM LEVEL2
-                order by MGW_lo 
-  </pre></code>                
+                round(TOT_ER_TF/case when node_type = 'TXX' 
+                        then trunc(ac.erlangb_package.ERLRED(0.xxx,MGW_CONTEDT+C_SHNL)) else
+            ROUND (A_ERLANGS / A_INTFCAP,3)*100 end AS a_intfil,
+--                CASE WHEN   NONCAP= 0 THEN 0 ELSE  ROUND ( NONA_
+                 FROM LEVEL2
+ ```
+ 
+ ```{sql}
   
 SUM CASE statement
 
