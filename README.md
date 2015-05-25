@@ -14,3 +14,4 @@ This repo is created to organize a variety of Markdown files which are non-funct
   3. [Exercise Study including charts](https://github.com/andrea345/RepData_PeerAssessment1/blob/master/PA1_template.md)
   4. [Exercise Study including charts html file ](http://rpubs.com/andrea345/83516)
   5. [Getting and Cleaning Data project](https://github.com/andrea345/Getting-Cleaning-Data-Project)
+  6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
