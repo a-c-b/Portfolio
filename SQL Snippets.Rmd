@@ -501,31 +501,30 @@ The dbas would order us to add certain optimizations to our code if it became in
 ["The DRIVING_SITE hint forces query execution to be done at a different site than that selected by Oracle. This hint can be used with either rule-based or cost-based optimization.  If this query is executed without the hint, then rows from departments are sent to the local site, and the join is executed there. With the hint, the rows from employees are sent to the remote site, and the query is executed there, returning the result to the local site.
 This hint is useful if you are using distributed query optimization."](http://docs.oracle.com/cd/B10500_01/server.920/a96533/hintsref.htm)
 
-
-
-
 ```{sql}
                  
  select /*+DRIVING_SITE(a)*/
                 msc_id as switch, 
-                lo_AREA_CODE as DAC,
-                START_se_AREA_CODE as cac,
                 lag(START_se_AREA_CODE, 1,0) over (partition by msc_id, lo_AREA_CODE order by START_se_AREA_CODE) E,
                 (START_se_AREA_CODE - LAG(START_se_AREA_CODE, 1, 0) OVER (partition by msc_id, lo_AREA_CODE ORDER BY START_se_AREA_CODE)) diffcac  
         from L.DACSTABLE@OTHERDB, dates 
         where pull_date between date1 and date3
          AND START_se_AREA_CODE = END_se_AREA_CODE
-                and lo_AREA_CODE >= 64000
+                and lo_AREA_CODE >= 200
                 )))),
+```
+The code below is a continuation of the same view we've been looking at, it is yet another vendor's group of data (i.e., Vendor A has two sets of data which need to be evaluated, so this is the second set of Vendor A, as opposed to the three sets for Vendor E, the two sets for vendor N, etc.
+```{sql}
+                
 step1 as (
        SELECT  
           distinct msc_id as switch1,
           trunc(pull_date) as dow1,
           loareacode as DAC1,
           msc_id||loareacode as uniqueid2
-      FROM MSCCM_WIREFIGUTRANDAC@OTHERDB, dates         
+      FROM CM_AC@OTHERDB, dates         
       where pull_date between date1 and date3
-             AND loareacode > = 64000
+             AND loareacode > = 2400
           ),
 step2 as (      
        select
@@ -547,13 +546,13 @@ A3 as (
         wHERE TOSS = 'NULL'
                  ),       
 msc_join as (
-select switch, vendor, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from e 
+select switch, vendor, DAC,  endrange, DAC||'-'||startrange||'-'||endrange as DACrange from e 
 union all 
-select switch, vendor, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a
+select switch, vendor,startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a
 union all
-select switch, vendor, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a2
+select switch, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a2
 union all
-select switch, vendor, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a3
+select vendor, DAC, startrange, endrange, DAC||'-'||startrange||'-'||endrange as DACrange from a3
 
 ),
  
@@ -565,3 +564,4 @@ msc_range as (
 
 ```
 
+Again, please note, these are non-functional and have been purposefully damaged, but are basically here in an attempt to demonstrate the problems I commonly addressed and solved using query code.
