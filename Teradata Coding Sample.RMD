@@ -3,7 +3,7 @@ title: "Teradata query samples"
 author: "Andrea Brice"
 date: "Monday, May 25, 2015"
 ---
-I have to say I was not impressed with [Teradata syntax](http://www.info.teradata.com/htmlpubs/DB_TTU_13_10/index.html#page/SQL_Reference/B035_1141_109A/ch02.04.01.html).  The query syntax was very familiar, but of course, of course, of course, they had to mess with date syntax.  Everyone does.  It's what really differentiates one query language from another (insert rude snort here).  I continued to run into things like no REGEXP support, much less, LEAD or LAG function support.  So, it's mostly what Teradata CAN'T do that I could speak to.    
+I have to say I was not impressed with [Teradata syntax](http://www.info.teradata.com/htmlpubs/DB_TTU_13_10/index.html#page/SQL_Reference/B035_1141_109A/ch02.04.01.html).  The query syntax was very familiar, but of course, Of Course, **Of Course**, they had to mess with date syntax.  Everyone does.  It's what really differentiates one query language from another (insert rude snort here).  I continued to run into things like no REGEXP support, much less, LEAD or LAG function support.  So, it's mostly what Teradata CAN'T do that I could speak to.    
 
 Mostly, I just pulled the data into a SQL Server database for reporting.  But, as you can see, Teradata SQL below is nothing "new," just a variant of the ANSI standard.  I believe the "big" difference would be in the Teradata database hardware and structure itself.  
 
