@@ -52,11 +52,7 @@ start_date desc) as row_number,
                 SUBSTR(SUBNET_BASE, INSTR(SUBNET_BASE, '.',1,3)+1,LENGTH(SUBNET_BASE)-INSTR
 (SUBNET_BASE, '.',1,3))*1 AS STR_LASTNUM,
                 SUBNET_NUMBER, 
-                SUBNET_BASE, 
-                SUBNET_BASE_NUM, 
-                SUBNET_MASK, 
-                SUBNET_MASK_NUM, 
-                SUBNET_NAME
+                SUBNET_BASE
 
             from  XXX.ADM_EXT_SUBNET@otherdb, dates
             where trunc(start_date) > = date1
@@ -90,14 +86,7 @@ start_date desc) as row_number,
             A.EXT_OFFSET_NAME,
             B.SUBNET_STRING||(B.STR_LASTNUM+A.EXT_OFFSET_NUMBER) AS NEWSTR,
             B.SUBNET_BASE_NUM, 
-            B.SUBNET_MASK, 
-            B.SUBNET_MASK_NUM, 
---            B.SUBNET_NUMBER,     
---            B.SUBNET_STRING,
---            B.STR_LASTNUM,
             A.EXT_OFFSET_NUMBER
-            
-
         FROM OFFSET A LEFT JOIN SUBNET_BASE B
         ON A.msc_subnet_num = B.msc_subnet_num
                 
@@ -277,15 +266,12 @@ In the case of whole table adds being introduced to schema, I'd dump the new tab
                     mgw,
                     table_name
                     from datum) 
-                    
-                    
-                
+ 
+ 
                     select *  from dataall
                         pivot(
                             count(datetime)
                         for table_name in (
-                 
-                                ' 
                                 'IMEXTANNOUNCEMENTS', 
                                 'PLUGINUNIT_SPLIT',
                                 'REMOTESITE',
@@ -295,10 +281,7 @@ In the case of whole table adds being introduced to schema, I'd dump the new tab
                         
                             ) 
                         )
-                order by mgw, dow
-            
-            
-  
+
 ```   
 
 ##  Example #4 Case statements
@@ -365,7 +348,7 @@ You will see a nested form of case in the code below:
                   ROUND(nvl(n.SICTX_CAP,0)/24,0) AS sipirt_alloc,
             round(nvl(h.SPM_LLOC_CHNL,0)/24,0) as spm_d_alloc_t1                
 ```
-Multiple left joins can cause severe system impacts.  This query timed out at over an hour to execute.  The report finally crossed four databases (3 oracle @ different versions, 1 SQL Server), > 20 source files, with > 30 view dependencies fishboning out to ~ 20 levels before the report output. 
+Multiple left joins can cause severe system impacts.  This query timed out at over an hour to execute.  The report finally crossed four databases (3 oracle @ different versions, 1 SQL Server), > 20 source files, with > 30 view dependencies fishboning out to ~ 20 levels before the report output. This is one version, not the latest, of the syntax.  This version created a report of 68 columns and over **10,000 characters**, but there were over 347 columns created in the various views.  
 ```{sql}
 from level_1 aa
 left join ab.no_MSC_NAME o on aa.CLLI||'-'||aa.MGW_LOC = o.msc_mgw_lo           
@@ -399,12 +382,8 @@ SELECT
                  FROM LEVEL2
  ```
  
+###  Use of SUM CASE statement - I used this syntax quite often to create counts of objects within a class.  
  ```{sql}
-  
-SUM CASE statement
-
- <pre><code> 
-
   select
           a.mgw as mgw,
           a.mgw_lo as mgw_lo,
@@ -424,13 +403,10 @@ SUM CASE statement
 Includes crossing multiple data marts, database versions, vendors, data types.  Joins the normalized data into a single table so that all vendors' nodes (i.e., the whole network) are represented.  The use of LAG and LEAD was applied for the vendor where there were individual rows of information and the range of one of the objects had to be aggregated so that the max and min number within the range were represented on a single line.
 
 ```{sql}
-
 create or replace view MSC_DAC_CAC_RANGES AS
-
 with 
 dates as (select * from PROD.CF_DATES),
-        
-
+ 
 E as (
 select distinct DAC,
         switch, 
@@ -441,9 +417,7 @@ select distinct DAC,
 from (
         select switch, DAC, cac, e, diffcac,
             max(diffcac) over (partition by switch, DAC order by cac RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) maxdiffcac
- 
         from (
- 
                  select switch, DAC, cac, e, 
                     sum(decode (diffcac, 1, 0, diffcac)) over (partition by switch, DAC order by cac RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) diffcac
                  from (
@@ -521,6 +495,17 @@ from (
                      sum(decode (diffcac, 1, 0, diffcac)) over (partition by switch, DAC order by cac RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) diffcac
                      
                  from (
+                 
+```
+The dbas would order us to add certain optimizations to our code if it became intensive.  Such as the DRIVING_SITE hint below. 
+["The DRIVING_SITE hint forces query execution to be done at a different site than that selected by Oracle. This hint can be used with either rule-based or cost-based optimization.  If this query is executed without the hint, then rows from departments are sent to the local site, and the join is executed there. With the hint, the rows from employees are sent to the remote site, and the query is executed there, returning the result to the local site.
+This hint is useful if you are using distributed query optimization."](http://docs.oracle.com/cd/B10500_01/server.920/a96533/hintsref.htm)
+
+
+
+
+```{sql}
+                 
  select /*+DRIVING_SITE(a)*/
                 msc_id as switch, 
                 lo_AREA_CODE as DAC,
