@@ -15,6 +15,8 @@ This forced me to change my logic about what I should and how I should bring in 
 
 As we were **not** running SQL Server 2012, all I can say is that - yet again - I found myself constrained by why I could do with this alternate variant of query language.  Again, much of the structure is quite, quite familiar, but then again, "they" just had to go and make minor changes / tweaks to things like date handling.  Substringing was also much, much more difficult in T-SQL, so I preferred to keep all my parsing & concatenating in the Oracle databases.  Really, I just wanted to use the T-SQL to join between databases because its restricted syntax was painful.  
 
+There are more samples available upon demand, but this one gives a solid example of **nesting** and **case** statements as well as the use of the **with** structure.
+
 ```{sql}
 	
 with 
@@ -97,6 +99,3 @@ CASE
 			FROM CALCD
 
 ```
-
-There are more samples, but this gives a solid example of **nesting** and **case** statements as well as the use of the **with** structure.
-
