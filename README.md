@@ -4,7 +4,7 @@ This repo is created to organize a variety of Markdown files which are non-funct
 
 1)  [Documenting Metric Definition Code](https://github.com/andrea345/Portfolio/blob/master/Documenting_Metric_Code.RMD)
 
-2)  Sample of Oracle SQL statements / code
+2)  [Sample of Oracle SQL statements / code](https://github.com/andrea345/Portfolio/blob/master/SQL%20Snippets.Rmd)
 
 3)  Sample of T-SQL code
 
