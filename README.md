@@ -8,7 +8,7 @@ This repo is created to organize a variety of Markdown files which are non-funct
 4.  Sample of Teradata coding
 5.  Sample of Perl
 6.  Sample of Visual Basic
-7. Sample of R code
+7. Sample of R code and knowledge of Markdown
   1. [NOAA Storm Data - MarkDown file](https://github.com/andrea345/NOAA-Storm-Data).
   2. [NOAA Storm Data html file on RPubs] (http://rpubs.com/andrea345/Storm_Data).
   3. [Exercise Study including charts](https://github.com/andrea345/RepData_PeerAssessment1/blob/master/PA1_template.md)
