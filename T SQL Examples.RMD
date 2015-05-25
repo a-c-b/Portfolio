@@ -13,3 +13,90 @@ By using "OpenQuery" syntax, I was able to manage some more complex query struct
 
 This forced me to change my logic about what I should and how I should bring in data to the development server.  It also forced me into a small amount of database administration.  
 
+As we were **not** running SQL Server 2012, all I can say is that - yet again - I found myself constrained by why I could do with this alternate variant of query language.  Again, much of the structure is quite, quite familiar, but then again, "they" just had to go and make minor changes / tweaks to things like date handling.  Substringing was also much, much more difficult in T-SQL, so I preferred to keep all my parsing & concatenating in the Oracle databases.  Really, I just wanted to use the T-SQL to join between databases because its restricted syntax was painful.  
+
+```{sql}
+	
+with 
+alldat as (select * FROM dbo.D_600_TRAFF where NAME like '%AN%')
+,PORTCT as (
+select DATETIME, ER600, MGCF,
+		case when operate_status = 'up' then count(port) else 0 end as working_PORT_CT,
+		case when operate_status <> 'up' then COUNT(PORT) else 0 end as non_op_PORT_CT
+FROM alldat
+group by DATETIME, ER600, MGCF, operate_status
+		) SELECT * FROM LVL1
+,TRAFF as (
+    SELECT  
+			
+			ReportWeekStart,
+			ReportWeekEnd,
+			ReportMonth,
+			DOW, 
+			Region, 
+			Market,
+			DATETIME, 
+			MGCF, SWITCH, MGCF_TYPE,SWITCH_VERSION,
+			COUNT(port) as total_PORTS,
+			ROUND(SUM(cast(Ne_Oate_Speed as FLOAT))/1000,0) as SUMMED_SPEED_BPS, 
+			sum(IN_OCTETS) as IN_OCTETS, 
+			sum(OUT_OCTETS) as OUT_OCTETS,
+			sum(IN_OCTETS)+sum(OUT_OCTETS) AS TOTAL_OCTETS,
+			sum(IN_MBPS) as IN_MBPS,
+			sum(OUT_MBPS) OUT_MBPS,
+			sum(IN_MBPS)+sum(OUT_MBPS) AS TOT_MBPS,
+			case when sum(IN_MBPS) >= sum(OUT_MBPS) then sum(IN_MBPS)
+					else sum(OUT_MBPS) end as MAX_MBPS
+		FROM alldat 
+		group by DATETIME, DOW, MGCF, MGCF_TYPE,SWITCH_VERSION, SWITCH,
+			ReportWeekStart, ReportWeekEnd, ReportMonth, Region, Market
+			)
+			
+,CALCD AS (
+	select 
+		ReportWeekStart,ReportWeekEnd,ReportMonth,DOW, a.DATETIME, Region, Market, 
+			MGCF, SWITCH, MGCF_TYPE,SWITCH_VERSION,
+			b.working_PORT_CT,
+			b.non_op_PORT_CT,
+			TOTAL_PORTS,
+			SUMMED_SPEED_MBPS, 
+			IN_OCTETS, 
+			OUT_OCTETS,
+			TOTAL_OCTETS,
+			IN_MBPS,
+			OUT_MBPS,
+			TOT_MBPS,
+			MAX_MBPS,
+			ROUND(MAX_MBPS/CAST(SUMMED_SPEED_MBPS AS FLOAT),4)*100 AS LAG_UTIL
+
+from TRAFF a, PORTCT b
+where a.DATETIME = b.DATETIME	and a.ER600 = b.ER600 and 	a.SLOT = b.SLOT	
+)
+
+
+SELECT 				
+			ReportWeekStart, 
+		ReportWeekEnd, 
+		ReportMonth, 
+		DOW, datetime,
+		Region, Market, MGCF, SWITCH, MGCF_TYPE, SWITCH_VERSION, 
+		ERS8600, 
+		OAM_IP, SERVER_NAME, SLOT, working_PORT_CT, non_op_PORT_CT, total_PORTS, SUMMED_SPEED_MBPS, IN_OCTETS, OUT_OCTETS, TOTAL_OCTETS, IN_MBPS, OUT_MBPS, TOT_MBPS, MAX_MBPS,
+		LAG_UTIL,
+
+CASE
+	WHEN LAG_UTIL = 0  THEN 0 
+	WHEN LAG_UTIL >0 AND LAG_UTIL <= 5 THEN 5   
+	WHEN LAG_UTIL >5 AND LAG_UTIL <= 10 THEN 10 
+	WHEN LAG_UTIL >75 AND LAG_UTIL <= 80 THEN 80 
+	WHEN LAG_UTIL >80 AND LAG_UTIL <= 85 THEN 85 
+	WHEN LAG_UTIL >85 AND LAG_UTIL <= 90 THEN 90 
+	WHEN LAG_UTIL >90 AND LAG_UTIL <= 95 THEN 95
+	ELSE 100
+	END  AS UTIL_BUCKET	
+			FROM CALCD
+
+```
+
+There are more samples, but this gives a solid example of **nesting** and **case** statements as well as the use of the **with** structure.
+
