@@ -1,0 +1,266 @@
+
+
+I haven't worked with Visual Basic in the recent past, but below is a small application I wrote using Visual Basic which pulled, parsed, and created a final report of raw data from a logfile.
+
+The program is fully commented.
+
+
+
+
+
+```{vb}
+'Begin procedures
+
+Sub EXEMP()
+  
+  'set up variables
+        
+ Dim resultCell As Boolean
+    
+  'macro to open a new workbook, import the EXEMP data, rename the worksheet "EXEMP" so rest of macro will work
+    import_EXEMP
+    
+    ' activate the primary sheet before editing data
+    
+    Worksheets("EXEMP").Activate
+    first_line
+'clear and arrange the columns in EXEMP worksheet
+    
+    Organize_EXEMP_sheet
+  
+'clear switch flags until END is found
+       Worksheets("EXEMP").Activate
+       Clear_sw_flag
+       
+' remove odd numbered RPs with twins (STC RPs do not have RP twins)
+       
+       rp_remove_odd_numbers
+       
+' get rid of double blank rows
+        blank_rows
+
+' get rid of blank rows between STCs
+          blank_rows_between_STCs
+              
+   '********** subroutine to get a filename to save the finished WORKSHEET as*******
+    get_new_filename
+       
+       End Sub
+'
+' BEGIN PROCEDURES
+ 
+'macro to open a new workbook, import the EXEMP data, rename the data "EXEMP" so rest of macro will work
+
+Sub import_EXEMP()
+
+Workbooks.Add               'add new workbook
+newexemp = ActiveWorkbook.Name           'dummy name for new made workbook
+
+Message = "Open the data file with the EXEMP printout you want."             'build message box
+Style = vbOKCancel
+Title = "Open EXEMP:RP=ALL,EM=ALL"
+Response = MsgBox(Message, Style, Title)
+
+
+If Response = vbOK Then
+
+    Application.FindFile                    'opens the application to find a file
+    exempfile = ActiveWorkbook.Name         'dummy name for data file
+    ActiveCell.Columns("A:H").EntireColumn.Select
+        Selection.Copy
+        Windows(newexemp).Activate
+        Sheets("Sheet1").Select
+        Selection.PasteSpecial Paste:=xlValues, Operation:=xlNone, _
+               SkipBlanks:=False, Transpose:=False
+    Windows(exempfile).Activate
+    ActiveWindow.Close
+    Windows(newexemp).Activate
+     Else
+              
+End If
+    Range("A1").Activate                    'return cursor to top of file
+    Range("A1").Select
+    
+    Sheets("Sheet1").Name = "EXEMP"
+   
+End Sub
+'*************************
+'subroutine to get to first line of data
+'***********************
+Sub first_line()
+
+Worksheets("EXEMP").Activate
+Range("A1").Select
+Range("A1").Activate
+Set counter = ActiveCell
+
+Do While counter <> "RP"
+
+    Set nextcounter = counter.Offset(1, 0)
+    counter.EntireRow.Select
+    Selection.Delete xlUp
+    
+    Set counter = nextcounter
+    
+Loop
+
+End Sub
+
+
+
+' Organize_EXEMP_sheet Macro
+' Macro recorded 8/4/98 by AT&T
+'
+'
+Private Sub Organize_EXEMP_sheet()
+    Range("a1").Activate
+    Range("a1").Select
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Find(What:="pp", After:=ActiveCell, LookIn:=xlValues, _
+        LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:= _
+        xlNext, MatchCase:=False).Activate
+    ActiveCell.Columns("A:A").EntireColumn.Select
+    Selection.Delete Shift:=xlToLeft
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Find(What:="twin", After:=ActiveCell, LookIn:=xlValues, _
+        LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:= _
+        xlNext, MatchCase:=False).Activate
+    ActiveCell.Columns("A:A").EntireColumn.Select
+    Selection.Cut
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Find(What:="rp", After:=ActiveCell, LookIn:=xlValues, _
+        LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:= _
+        xlNext, MatchCase:=False).Activate
+    ActiveCell.Offset(0, 1).Columns("A:A").EntireColumn.Select
+    Selection.Insert Shift:=xlToRight
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Find(What:="em", After:=ActiveCell, LookIn:=xlValues, _
+        LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:= _
+        xlNext, MatchCase:=False).Activate
+    ActiveCell.Columns("A:A").EntireColumn.Select
+    Selection.Cut
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Find(What:="twin", After:=ActiveCell, LookIn:=xlValues, _
+        LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:= _
+        xlNext, MatchCase:=False).Activate
+    ActiveCell.Offset(0, 1).Columns("A:A").EntireColumn.Select
+    Selection.Insert Shift:=xlToRight
+End Sub
+
+' Remove_Switch_Flag Macro
+' 'move down the row
+   Private Sub Clear_sw_flag()
+       Set currentcell = Worksheets("EXEMP").Range("A1")
+        Do While currentcell <> "END"
+        Set nextcell = currentcell.Offset(1, 0)
+        If currentcell = "WO" Then
+            currentcell.EntireRow.Select
+            Selection.Delete Shift:=xlUp
+            End If
+            Set currentcell = nextcell
+           Loop
+       End Sub
+          
+       
+       
+ 'Function to remove odd numbered RPs
+ Sub rp_remove_odd_numbers()
+
+' set statements before function
+Set rpCell = Worksheets("EXEMP").Range("A2")
+Set twinCell = Worksheets("EXEMP").Range("b2")
+Set resultCell = Worksheets("EXEMP").Range("h2")
+ 
+' begin function of checking for odd # RPs which are not STCs
+Do While rpCell <> "END"
+
+' set "next cell" values before function
+
+Set nextRP = rpCell.Offset(1, 0)
+Set nextTwin = twinCell.Offset(1, 0)
+Set nextresult = resultCell.Offset(1, 0)
+    
+    rc = Right(rpCell, 1)           'to check if even # or odd # need last digit of RP #
+    resultCell = (twinCell = "") Or (rc = "0") Or (rc = "2") Or (rc = "4") Or (rc = "6") Or (rc = "8") ' function to verify not an STC (no RP twin) or is
+                                                                                                                                                              'not an even number as well
+        
+        If resultCell = False Then      ' if the number is an odd #'d RP with an RP twin, then delete the row
+            rpCell.EntireRow.Select
+            Selection.Delete Shift:=xlUp
+            End If
+            Set rpCell = nextRP
+            Set twinCell = nextTwin
+            Set resultCell = nextresult
+          Loop
+ 
+ End Sub
+  
+ 
+ ' get rid of double blank rows
+ 
+Private Sub blank_rows()
+    Set currentcell = Worksheets("EXEMP").Range("A1")
+    
+        Do While currentcell <> "END"
+        Set nextcell = currentcell.Offset(1, 0)
+        If currentcell = "" And nextcell = "" Then
+            currentcell.EntireRow.Select
+            Selection.Delete Shift:=xlUp
+            End If
+            Set currentcell = nextcell
+           Loop
+End Sub
+
+
+ ' get rid of blank rows between STCs
+ 
+Private Sub blank_rows_between_STCs()
+
+    Set currentcell = Worksheets("EXEMP").Range("A1")           ' column for RP used to check for "end" statement
+    Set twinCell = Worksheets("EXEMP").Range("B1")                 'column for RP twin
+   
+        Do While currentcell <> "END"
+        Set nextcell = currentcell.Offset(1, 0)
+        Set nextTwin = twinCell.Offset(1, 0)
+        Set thirdCell = nextcell.Offset(1, 0)
+        Set thirdTwin = nextTwin.Offset(1, 0)
+                           
+        If currentcell <> "" And twinCell = "" And nextcell = "" And nextTwin = "" And thirdCell <> "" And thirdTwin = "" Then
+            Set currentcell = thirdCell
+            Set twinCell = thirdTwin
+            nextcell.EntireRow.Select
+            Selection.Delete Shift:=xlUp
+            Else
+           Set currentcell = nextcell
+            Set twinCell = nextTwin
+            End If
+                       
+           Loop
+
+End Sub
+
+'********** subroutine to get a filename to save the finished WORKSHEET as*******
+
+Sub get_new_filename()
+
+prompt = "Give a path and filename for where you'd like your new data stored."
+Style = vbOKOnly
+Response = InputBox(prompt, Style)
+
+newfile = Response
+
+    ActiveWorkbook.SaveAs Filename:=newfile, _
+        FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+        ReadOnlyRecommended:=False, CreateBackup:=False
+
+Range("a1").Select
+
+prompt = "DONE NOW"
+Style = vbOKOnly
+Response = MsgBox(prompt, Style)
+
+
+End Sub
+
+```
+
