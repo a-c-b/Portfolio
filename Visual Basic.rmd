@@ -2,11 +2,9 @@
 
 I haven't worked with Visual Basic in the recent past, but below is a small application I wrote using Visual Basic which pulled, parsed, and created a final report of raw data from a logfile.
 
+There are seven subroutines, including the one for a file rename.
+
 The program is fully commented.
-
-
-
-
 
 ```{vb}
 'Begin procedures
