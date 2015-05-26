@@ -6,7 +6,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
 2.  [Sample of Oracle SQL statements / code](https://github.com/andrea345/Portfolio/blob/master/SQL%20Snippets.Rmd)
 3.  [Sample of T-SQL code](https://github.com/andrea345/Portfolio/blob/master/T%20SQL%20Examples.RMD)
 4.  [Sample of Teradata coding](https://github.com/andrea345/Portfolio/blob/master/Teradata%20Coding%20Sample.RMD)
-5.  Sample of Perl
 6.  [Sample of Visual Basic](https://github.com/andrea345/Portfolio/blob/master/Visual%20Basic.rmd)
 7. Sample of R code and knowledge of Markdown
   1. [NOAA Storm Data - MarkDown file](https://github.com/andrea345/NOAA-Storm-Data).
