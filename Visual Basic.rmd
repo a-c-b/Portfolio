@@ -15,6 +15,8 @@ The logfiles were resident on a specific drive in a specific directory and then 
 
 This is how I managed data wrangling in the past.  There were many data sets which had to be pulled, cleaned, parsed and then joined together to create a logical output.  As network complexity grew, what used to take 3 commands to be executed for a continuous path check for availability, grew to over 26.  Capital equipment which was not fully defined would be and often was "lost" to allocation because of this specific problem of missing configuration data. 
 
+I have other, more complex macros available upon request.
+
 ## Macro 1
 The steps in this first macro
 1.  Opened a new workbook, import the data in columnar format, and renamed the worksheet.  
