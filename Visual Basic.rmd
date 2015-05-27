@@ -7,7 +7,7 @@ My process for collecting the data was commonly:
 1.  I would write scripts in Reflections or ReflectionsX which would open a TCP/IP session to a TTY port of a node.
 2.  Open a log file
 3.  Execute a single MML command against the node.
-4.  Then close the logfile when a specific flag is detected.  Then either
+4.  Close the logfile when a specific flag is detected.  Then either
   1. Open a new logfile and execute another MML command and close the new logfile OR
   2. exit the Node and move to the next node.
 
