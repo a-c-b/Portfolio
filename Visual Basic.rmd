@@ -1,7 +1,9 @@
 
 
 Below  are some small applications I wrote using Visual Basic which pulled, parsed, and created a final report of raw data from a logfile.  
+
 My process for collecting the data was commonly:
+
 1.  I would write scripts in Reflections or ReflectionsX which would open a session to a node.
 2.  Open a log file
 3.  Execute a single MML command against the node.
