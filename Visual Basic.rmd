@@ -1,10 +1,29 @@
 
 
-I haven't worked with Visual Basic in the recent past, but below is a small application I wrote using Visual Basic which pulled, parsed, and created a final report of raw data from a logfile.
+Below  are some small applications I wrote using Visual Basic which pulled, parsed, and created a final report of raw data from a logfile.  
+My process for collecting the data was commonly:
+1.  I would write scripts in Reflections or ReflectionsX which would open a session to a node.
+2.  Open a log file
+3.  Execute a single MML command against the node.
+4.  Then close the logfile when a specific flag is detected.  Then either
+  1. Open a new logfile and execute another MML command and close the new logfile OR
+  2. exit the Node and move to the next node.
 
-There are seven subroutines, including the one for a file rename.
+ 
+  
+  
 
-The program is fully commented.
+This is how I managed data wrangling in the past.  There were many data sets which had to be pulled, cleaned, parsed and then joined together to create a logical output.
+
+## Macro 1
+The steps in this first macro
+1.  Opened a new workbook, import the data in columnar format, and renamed the worksheet.  
+2.  The next arranged the columns in a specific order.  
+3.  Cleared flag lines.  
+4.  Operated on one of the numeric fields and removed odd numbered processors if there was a "twin" condition (i.e., stand-by)
+5.  Removed double blank rows.
+6.  Renamed the file per instruction.
+
 
 ```{vb}
 'Begin procedures
