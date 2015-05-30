@@ -5,7 +5,7 @@ date: "Tuesday, May 19, 2015"
 
 ---
 #  Purpose
-The purpose of this document is to demonstrate my coding.  The schema, some of the logic, the names, and other pieces of information have been changed so the examples are non-functional.  They are here to show my knowledge of syntax and a little bit of the complexity of some of the work I've done.
+The purpose of this document is to demonstrate my coding with Oracle SQL.  The schema, some of the logic, the names, and other pieces of information have been changed so the examples are non-functional.  They are here to show my knowledge of syntax and a little bit of the complexity of the work I've done.
 
 I had more flexibility in code as we went through the Oracle upgrades to version 12.  Some of the statistical analysis statements were only available to me after the most recent upgrade on one of the databases.  Until recently, my parsing was not done with REGEXP because I did not have access to that syntax, and even then, not across all databases.  So much of my older code used INSTR, SUBSTR, etc.  I have, however, included some code with examples of using REGEXP syntax.
 
