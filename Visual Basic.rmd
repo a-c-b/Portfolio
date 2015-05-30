@@ -1,6 +1,4 @@
-Below  are some small applications I wrote using Visual Basic which pulled, parsed, and created final reports from raw data logfiles.  Most of the data wrangling I did was to capture and manage capital equipment configuration data to ensure that the engineers, operators, and executive management knew how much hardware we had.  This was not a purchasing problem, but an allocation and software definition problem.  Over time, configuration data grew so complex that any step missing in the process could "remove" hardware from the network in that systems did not "know" that hardware was there.
-
-Software companies like Granite evolved to take care of this problem.  However, other problems grew out of static allocation of purchased equipment.  Sometimes just bare frames were wired up without plugs, or plugs were moved.  Managing allocations by human intervention was not efficient.  Also, for dynamic reporting of utilization, capacity counts are required for the denominators.  Traffic / Capacity = Utilization and those capacity numbers could vary based upon software definition or software release.  That is why active configuration data was so important to collect.
+Below  are some small applications I wrote using Visual Basic which pulled, parsed, and created final reports from raw data logfiles.  Most of the ETL I did captured capital equipment configuration.  
 
 My process for collecting the data was commonly:
 
