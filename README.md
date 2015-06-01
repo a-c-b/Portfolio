@@ -14,3 +14,4 @@ This repo is created to organize a variety of Markdown files which consist of fu
   4. [Exercise Study including charts html file ](http://rpubs.com/andrea345/83516)
   5. [Getting and Cleaning Data project](https://github.com/andrea345/Getting-Cleaning-Data-Project)
   6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
+8. [Hive samples](https://github.com/andrea345/Portfolio/blob/master/Hive_Hadoop.RMD)
