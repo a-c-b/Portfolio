@@ -1,0 +1,32 @@
+Working with HDInsight on Microsoft's Azure platform I set up some clusters and then, using data from [Seattle's open data] (https://data.seattle.gov/) project introduced myself for the first time to Hive on an Hadoop based platform.  The Hive query language is far behind where Oracle is - it's another variant of query language.  However, this application is allowing me the opportunity to practice and learn the syntax.
+
+I used Cloudberry Explorer for Azure to pull the raw .csv file over to the Hadoop Cluster on HDInsight.  The code below as used to create the table.  The Date datatype was incompatible with the date format of the original file, so substringing, and other code will be used to create a modified table on this original table created from the .csv file.  
+
+```{hive}
+create external table ElecPermit (
+Application_Permit_Number int,
+Permit_Type string,
+Address string,
+Description string,
+Category string,
+Action_Type string,
+Work_Type string,
+Value float,
+Applicant_Name string,
+Application_Date string,
+Issue_Date string,
+Final_Date string,
+Expiration_Date string,
+Status string,
+Contractor string,
+Permit_and_Complaint_Status_URL string,
+Latitude float,
+Longitude float,
+Location string)
+
+row format delimited fields terminated by ','
+
+stored as textfile location 'xxx://hadoop-seattle-data@txxx.blob.core.windows.net/hive/warehouse/elecpermit'
+tblproperties ("skip.header.line.count"="1");
+
+```
