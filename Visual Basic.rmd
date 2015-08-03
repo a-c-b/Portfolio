@@ -277,4 +277,603 @@ Response = MsgBox(prompt, Style)
 End Sub
 
 ```
+The following bit is an old script which would pull in raw data, tidy it, then merge it with another file.  The file is fully commented.  
 
+```{vb}
+'THIS MODULE SHEET CONTAINS THE IMPORT FILE MACROs
+'and the macros to clean up the data
+'1st sub:   import_mbtrac
+'2nd sub:   import_exscp
+'3rd sub:   clear_sw_flag_EXSCP
+'4th sub:   EXSCP_SIDES
+'5th sub:   clean_up_EXSCP
+'6th sub:   import_mbeqp
+'7th sub:   merge_mbeq
+'8th sub:   clean_MBEQP
+'9th sub:   clean_MBTRAC
+
+'****************************
+'module to import mbltp:dety=mbtrac for any switch
+
+Sub import_mbtrac()
+
+'clean up MBTRAC sheet before execute module for new data
+     
+    Sheets("MBTRAC").Activate
+   Dim CLEARRANGE
+   Dim message
+   Dim style
+   Dim title
+   Dim response
+   
+   Set CLEARRANGE = Worksheets("MBTRAC").Range("A:M")
+    CLEARRANGE.EntireColumn.Clear
+    Sheets("MBTRAC").Activate
+    Range("A1").Activate
+    Range("A1").Select
+    
+message = "Open the MBLTP:DETY=MBTRAC file"             'build message box
+    style = vbOK
+    title = "Open MBLTP:DETY=MBTRAC box "
+    response = MsgBox(message, style, title)
+
+message = "Open the MBLTP:DETY=MBTRAC file by going to the directory and highlighting file to open.  You will have to make the column limits."             'build message box
+style = vbOKCancel
+title = "Open MBLTP:DETY=MBTRAC box "
+response = MsgBox(message, style, title)
+
+
+If response = vbOK Then
+Dim MBTRACFILE
+
+    Application.FindFile
+    MBTRACFILE = ActiveWorkbook.Name
+    ActiveCell.Columns("A:E").EntireColumn.Select
+        Selection.Copy
+        Windows("TRAB2 97.xls").Activate
+        Sheets("MBTRAC").Select
+        Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+               skipblanks:=False, Transpose:=False
+    Windows(MBTRACFILE).Activate
+    ActiveWindow.Close
+    Windows("TRAB2 97.xls").Activate
+     Else
+              
+End If
+    Range("A1").Activate                    'return cursor to top of file
+    Range("A1").Select
+
+
+End Sub
+
+
+'*********************************
+'module to import exscp:name=all for any switch
+
+Sub import_exscp()
+Dim CLEARRANGE
+Dim message
+Dim style
+Dim title
+Dim response
+'clean up EXSCP sheet before execute module for new data
+   Set CLEARRANGE = Worksheets("EXSCP").Range("A:M")
+    CLEARRANGE.EntireColumn.Clear
+    Sheets("EXSCP").Activate
+    Range("A1").Activate
+    Range("A1").Select
+
+message = "Open the EXSCP:NAME=ALL file.  Import with 3 COLUMNS."
+style = vbOKCancel
+title = "Open EXSCP:NAME=ALL box "
+response = MsgBox(message, style, title)
+
+If response = vbOK Then
+Application.FindFile                                                'use the application of OpenFile to set special delimiters
+Dim MBTRACFILE
+MBTRACFILE = ActiveWorkbook.Name
+ActiveCell.Columns("A:D").EntireColumn.Select
+    Selection.Copy
+    Windows("TRAB2 97.xls").Activate
+    Sheets("EXSCP").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+           skipblanks:=False, Transpose:=False
+    Windows(MBTRACFILE).Activate                    'switch back to log file to close log file
+    ActiveWindow.Close
+    Windows("TRAB2 97.xls").Activate
+End If
+End Sub
+
+
+
+'***********************************
+
+'module to clean up EXSCP of switch flag & move down the row then get rid of all blank lines
+'within the A column so "side1" & "side2" can always be correctly selected.
+Sub clear_sw_flag_EXSCP()
+  Worksheets("EXSCP").Activate
+  Dim currentcell
+  Dim nextcell
+  
+  
+Set currentcell = Worksheets("EXSCP").Range("A1")
+        Do While currentcell <> "END"
+        Set nextcell = currentcell.Offset(1, 0)
+        If currentcell Like "WO*" Then
+               currentcell.EntireRow.Delete Shift:=xlUp
+             End If
+            Set currentcell = nextcell
+           Loop
+    
+    Sheets("EXSCP").Select                         'get rid of blank lines without having to check 9,000 lines of data:  recorded macro
+    Columns("A:J").Select
+    Selection.AutoFilter
+    Selection.AutoFilter Field:=1, Criteria1:="<>"
+    Selection.SpecialCells(xlVisible).Select
+    Selection.Copy
+    Sheets("WORKSHEET").Select
+    Range("A1").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    Sheets("EXSCP").Select
+    Application.CutCopyMode = False
+    Selection.AutoFilter
+    Columns("A:M").Select
+    Selection.ClearContents
+    Range("A1").Select
+    Sheets("WORKSHEET").Select
+    Columns("A:J").Select
+    Selection.Copy
+    Sheets("EXSCP").Select
+    ActiveSheet.Paste
+    Sheets("WORKSHEET").Select
+    Application.CutCopyMode = False
+    Selection.ClearContents
+    Sheets("EXSCP").Select
+    Range("A1").Select
+           
+           
+       End Sub
+       
+
+
+'**************************************
+
+' module to move SIDE1 & SIDE2 to the side of the NAME row in EXSCP
+Sub EXSCP_SIDES()
+
+    Worksheets("EXSCP").Activate
+Dim nameCell
+Dim side1range
+Dim side2range
+
+    Set nameCell = Worksheets("EXSCP").Range("a1")
+    
+    Do Until nameCell = "END"
+    If nameCell = "NAME" Then
+        Set side1range = nameCell.Range("A3:C4")
+        Set side2range = nameCell.Range("a5:c6")
+        side1range.Select
+        Selection.Cut
+        nameCell.Offset(0, 4).Select
+        ActiveSheet.Paste
+        side2range.Select
+        Selection.Cut
+        nameCell.Offset(0, 7).Select
+        ActiveSheet.Paste
+                 
+         End If
+         Dim nextcell
+     Set nextcell = nameCell.Offset(1, 0)
+        Set nameCell = nextcell
+       
+Loop
+End Sub
+
+'********************
+' sub to remove blank lines in EXSCP
+
+Sub clean_up_EXSCP()
+     Dim currentcell
+     Dim nextcell
+     
+     Worksheets("EXSCP").Activate
+    
+    Set currentcell = Worksheets("EXSCP").Range("A1")
+         
+        Do While currentcell <> "NAME"              'DO WHILE to check for first header of data.  If file is imported
+                                                                                'with the first lines of data being something we don't want, then they are removed.
+        Set nextcell = currentcell.Offset(1, 0)
+         currentcell.EntireRow.Delete Shift:=xlUp
+         Set currentcell = nextcell
+        
+        Loop
+     
+     
+    Sheets("EXSCP").Select                         'get rid of blank lines without having to check 9,000 lines of data:  recorded macro
+    Columns("A:J").Select
+    Selection.AutoFilter
+    Selection.AutoFilter Field:=1, Criteria1:="<>"
+    Selection.SpecialCells(xlVisible).Select
+    Selection.Copy
+    Sheets("WORKSHEET").Select
+    Range("A1").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    Sheets("EXSCP").Select
+    Application.CutCopyMode = False
+    Selection.AutoFilter
+    Columns("A:M").Select
+    Selection.ClearContents
+    Range("A1").Select
+    Sheets("WORKSHEET").Select
+    Columns("A:J").Select
+    Selection.Copy
+    Sheets("EXSCP").Select
+    ActiveSheet.Paste
+    Sheets("WORKSHEET").Select
+    Application.CutCopyMode = False
+    Selection.ClearContents
+    Sheets("EXSCP").Select
+    Range("A1").Select
+
+
+    Range("A1:J1").Select               'get rid of all headers except the first line
+    Selection.Cut
+    Range("K1").Select
+    ActiveSheet.Paste
+    Columns("A:J").Select
+    Selection.AutoFilter
+    Selection.AutoFilter Field:=1, Criteria1:="NAME"
+    Selection.SpecialCells(xlVisible).Select
+    Selection.ClearContents
+    Columns("A:J").Select
+    Selection.AutoFilter
+    Selection.AutoFilter Field:=1, Criteria1:="="           'Get rid of all blank lines by filtering on non-blank lines & copying
+    Selection.SpecialCells(xlVisible).Select                    'to WORKSHEET sheet
+    Selection.AutoFilter Field:=1, Criteria1:="<>"
+    Columns("A:J").Select
+    Selection.SpecialCells(xlVisible).Select
+    Selection.Copy
+    
+    Sheets("WORKSHEET").Select
+    Range("A1").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    
+    Sheets("EXSCP").Select                                  'clean up the old data out of EXSCP
+    Selection.AutoFilter Field:=1
+    Application.CutCopyMode = False
+    Selection.AutoFilter
+    Columns("A:J").Select
+    Selection.ClearContents
+    Range("A1").Select
+    
+    Sheets("WORKSHEET").Select                  'Copy the cleaned up data back to EXSCP
+    Columns("A:I").Select
+    Selection.Copy
+    Sheets("EXSCP").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    
+    Range("K1:T1").Select                       'add the headers back into the first row
+    Application.CutCopyMode = False
+    Selection.Cut
+    Range("A1").Select
+    ActiveSheet.Paste
+    Range("A1").Select
+    
+    Sheets("WORKSHEET").Select              'clean up WORKSHEET sheet & put cursor back to cell A1
+    Columns("A:J").Select
+    Selection.ClearContents
+    Range("A1").Select
+    
+    Sheets("EXSCP").Select              'return to EXSCP file
+    
+    Cells.Select                                                                    'get rid of DEV= in worksheet
+    Selection.Replace What:="DEV=", Replacement:="", LookAt:=xlPart, _
+    SearchOrder:=xlByRows, MatchCase:=False
+
+End Sub
+
+
+'****************************
+'module to import MBEQP for any switch
+
+Sub import_mbeqp()
+Dim message
+Dim title
+Dim style
+Dim response
+
+'clean up MBEQP sheet and WORKSHEETbefore execute module for new data
+   Dim CLEARRANGE
+   Sheets("WORKSHEET").Activate
+   Set CLEARRANGE = Worksheets("WORKSHEET").Range("A:M")
+    CLEARRANGE.EntireColumn.Clear
+    
+    Range("A1").Activate
+    Range("A1").Select
+   
+   Sheets("MBEQP").Activate
+   Set CLEARRANGE = Worksheets("MBEQP").Range("A:M")
+    CLEARRANGE.EntireColumn.Clear
+    
+    Sheets("MBEQP").Activate
+    Range("A1").Activate
+    Range("A1").Select
+
+'build message box to warn user to know if there are 1 or 2 files to process
+
+message = "Check if the file dumps have separated the MBDEQs & the MBCEQs ** "
+style = vbOKOnly
+title = "WARNING!!! QUIT THIS PROGRAM NOW (CTL BREAK) IF YOU DON'T KNOW IF YOU'LL BE WORKING WITH TWO FILES FOR MBEQP info!"
+response = MsgBox(message, style, title)
+
+Do Until response = vbOK
+Loop
+       
+message = "Open the MBEQP:CETY= file"             'build message box to pull file
+style = vbOKCancel
+title = "Open MBEQP:CETY box "
+response = MsgBox(message, style, title)
+
+If response = vbOK Then
+
+Dim mbeq1file
+    Application.FindFile
+    mbeq1file = ActiveWorkbook.Name
+    ActiveCell.Columns("A:E").EntireColumn.Select
+        Selection.Copy
+        Windows("TRAB2 97.xls").Activate
+        Sheets("MBEQP").Select
+            Range("A1").Activate
+            Range("A1").Select
+        Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+               skipblanks:=False, Transpose:=False
+    Windows(mbeq1file).Activate
+    ActiveWindow.Close
+    Windows("TRAB2 97.xls").Activate
+End If
+                            'check if MBEQP has 1 or 2 files: one for MBDEQs & one for MBCEQs
+     
+     message = "Is there another MBEQP file?"
+     style = vbYesNo
+     title = "Open 2nd MBEQP file"
+     response = MsgBox(message, style, title)
+     
+     If response = vbYes Then            'pull 2nd MBEQP file in
+Dim mbeq2file
+    Application.FindFile
+    mbeq2file = ActiveWorkbook.Name
+    ActiveCell.Columns("A:E").EntireColumn.Select
+        Selection.Copy
+        Windows("TRAB2 97.xls").Activate
+        Sheets("WORKSHEET").Select
+        Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+               skipblanks:=False, Transpose:=False
+    Windows(mbeq2file).Activate
+    ActiveWindow.Close
+    Windows("TRAB2 97.xls").Activate
+
+merge_mbeq                      ' call subroutine to merge the two files
+ Else                               'get rid of blank lines and stuff which can crash the program when both MBDEQs & MBCEQs
+                                        'already exist in the same file
+    
+    Columns("D:D").Select
+    Selection.SpecialCells(xlBlanks).Select
+    Selection.Value = "X"
+    
+    Range("D1").Select
+    Range("D1").Activate
+    Dim killcell
+    Dim nextkill
+    
+    Set killcell = ActiveCell
+    Set nextkill = killcell.Offset(1, 0)
+    
+Do While nextkill <> ""
+    
+    killcell.Select
+    
+    If killcell = "X" Then
+    
+    Selection.EntireRow.Select
+    Selection.Delete xlUp
+   End If
+    Set killcell = nextkill
+    Set nextkill = killcell.Offset(1, 0)
+    
+  Loop
+    
+End If
+    
+    Worksheets("MBEQP").Activate
+    Range("A1").Select
+    Range("A1").Activate   'leave import of 2nd MBEQP file into worksheet "MBEQP"
+                                     'check if you actually need the 2nd MBEQP file
+  
+End Sub
+
+ '*************************************
+ 'module to merge 2 MBEQP files together
+ '*****************************
+              
+ Sub merge_mbeq()
+    Dim copyrange As Range
+    Dim BEG1
+    Dim end1
+    
+    Worksheets("MBEQP").Activate
+    Range("A1").Select
+    Range("A1").Activate
+    Set BEG1 = ActiveCell
+    Cells.Find(What:="END", After:=ActiveCell, LookIn:=xlFormulas, _
+        LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext _
+        , MatchCase:=False).Activate
+
+Set end1 = ActiveCell                           'find the end of the MBDEQ file - which is where the MBCEQs will be added
+    
+    Worksheets("WORKSHEET").Activate
+    Range("A1").Select
+    Range("A1").Activate                        'get 2nd MBDEQ file data
+    
+    Cells.Find(What:="END", After:=ActiveCell, LookIn:=xlFormulas, _
+        LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext _
+        , MatchCase:=False).Activate
+        Set copyrange = ActiveCell.CurrentRegion        ' set region to copy from "END" of file to header
+        copyrange.Select
+        Selection.Copy
+   
+     Worksheets("MBEQP").Activate                   'paste selected region of MBCEQ data
+        ActiveSheet.Paste
+            
+        Worksheets("WORKSHEET").Activate        'clear the WORKSHEET
+        Columns("A:E").Select
+        Selection.ClearContents
+        Range("A1").Select
+        Selection.Activate
+            
+ End Sub
+ 
+ 
+ '*************************************************
+ 'module to clean up MBEQP file
+ '**************************************
+ Sub clean_MBEQP()
+ Dim currentcell
+ Dim nextcell
+ 
+   Worksheets("MBEQP").Activate
+Set currentcell = Worksheets("MBEQP").Range("A1")
+    currentcell.Activate
+            
+           Do While currentcell <> "CEQ"                    'delete all cells before first header, once first header is found, keep
+            Set nextcell = currentcell.Offset(1, 0)
+            currentcell.EntireRow.Delete Shift:=xlUp
+           Set currentcell = nextcell
+           Loop
+        
+        Set nextcell = currentcell.Offset(1, 0)             'skip the header
+        Set currentcell = nextcell
+                                                                                    'create headers to count blank cells in column 'A" because "END" may
+     Dim counter1
+     Dim counter2
+     Dim counter3
+     Dim counter4
+     Dim counter5
+     Dim counter6
+                                                                                        
+                                                                                        'or may not be found in this file.
+     Set counter1 = nextcell.Offset(1, 0)
+     Set counter2 = nextcell.Offset(2, 0)
+     Set counter3 = nextcell.Offset(3, 0)
+     Set counter4 = nextcell.Offset(4, 0)
+     Set counter5 = nextcell.Offset(5, 0)
+     Set counter6 = nextcell.Offset(6, 0)
+        
+Do While nextcell <> "" Or counter1 <> "" Or counter2 <> "" Or counter3 <> "" Or counter4 <> "" Or counter5 <> "" Or counter6 <> ""
+       
+       Set nextcell = currentcell.Offset(1, 0)
+
+        If currentcell Like "MBCEQ*" Or currentcell Like "MBDEQ*" Or currentcell Like "" Then      'skip all lines with relevant data
+               Else
+               currentcell.EntireRow.Delete Shift:=xlUp
+             End If
+            Set currentcell = nextcell
+            Set counter1 = counter2
+            Set counter2 = counter3
+            Set counter3 = counter4
+            Set counter4 = counter5
+            Set counter5 = counter6
+            Set counter6 = counter6.Offset(1, 0)
+             
+Loop
+       
+    Range("A1").Select                          'return to top of worksheet
+    Range("A1").Activate
+ End Sub
+ 
+ '*********************************
+
+' macro to clean up MBTRAC data - removes all lines except MBTRAC- & headers
+'
+Sub clean_MBTRAC()
+    Dim currentcell
+    Dim nextcell
+    
+    Sheets("MBTRAC").Select
+    Range("A1").Select
+    Range("A1").Activate
+    Columns("A:A").Select
+    
+    Set currentcell = Worksheets("MBTRAC").Range("A1")
+        
+        Do While currentcell <> "DEV"              'DO WHILE to check for first header of data.  If file is imported
+                                                                                'with the first lines of data being something we don't want, then they are removed.
+        Set nextcell = currentcell.Offset(1, 0)
+         currentcell.EntireRow.Delete Shift:=xlUp
+         Set currentcell = nextcell
+        
+        Loop
+ 
+    Range("A1:E1").Select                                                           'Move headers out of the way of the autofilter so they can be returned again
+    Selection.Cut Destination:=Range("F1:J1")
+  
+  Columns("A:A").Select
+    
+    Set currentcell = Worksheets("MBTRAC").Range("A1")
+        
+        Do While Not (currentcell Like "MBTRAC*")              'DO WHILE to check for first header of data.  If file is imported
+               Set nextcell = currentcell.Offset(1, 0)
+                Range("A1:E1").Select
+                Selection.Delete Shift:=xlUp                                  'if the first lines of data being something we don't want, then they are removed.
+                Set currentcell = nextcell
+           
+           Loop
+    
+    Columns("A:E").Select                                                   'module to filter on MBTRAC text on line.  Kill all other lines
+    Selection.AutoFilter
+    Selection.AutoFilter Field:=1, Criteria1:="MBTRAC*", Operator:= _
+        xlAnd
+    Selection.SpecialCells(xlVisible).Select
+    Selection.Copy                                                          'copy the filtered MBTRAC data to the WORKSHEET sheet to clear the MBTRAC sheet
+    
+    Sheets("WORKSHEET").Select
+    Range("A1").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    
+    Sheets("MBTRAC").Select                                 'clear the MBTRAC sheet
+    Range("A1").Select
+    Application.CutCopyMode = False
+    Selection.AutoFilter
+    Columns("A:E").Select
+    Selection.ClearContents
+    Range("A1").Select
+    
+    Sheets("WORKSHEET").Select              'copy the filtered data back into MBTRAC sheet, leaving room for the header
+    Selection.Copy
+    Sheets("MBTRAC").Select
+    Range("A2").Select
+    Selection.PasteSpecial Paste:=xlValues, operation:=xlNone, _
+        skipblanks:=False, Transpose:=False
+    
+    Range("F1:J1").Select                           'move the header back into cell A1
+    Application.CutCopyMode = False
+    Selection.Cut Destination:=Range("A1:E1")
+    Range("A1").Select
+    
+    Sheets("WORKSHEET").Select              'clear garbage data from worksheet
+    Columns("A:M").Select
+    Selection.ClearContents
+    Range("A1").Select
+    
+    Sheets("WORKSHEET").Select          'return to finished MBTRAC sheet
+     Range("A1").Select
+    
+    
+End Sub
+
+```
+     
