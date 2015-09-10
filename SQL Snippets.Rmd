@@ -537,5 +537,28 @@ msc_range as (
   ) SELECT * FROM MSC_RANGE
 
 ```
+##  Example #6 Operating on dates
+We had to modify dates in a variety of manners.  The code below operates on dates by converting the system date to a day and then subtracting or adding a specific number of days to the system date.
 
+```{sql}
+
+    select
+--    date1 is the first day of the reporting period   
+--    date2 is for the end of config data collection - or the last day of the reporting period
+--    date3 is for working with Optima traffic data so you can pull up to midnight of the next day (ie., 11:59 of friday night)
+--    date4 is to extend the range of the reporting period
+    
+    
+      trunc(sysdate) - ((to_char(sysdate , 'D') +7)) as date1,
+      trunc(sysdate) - ((to_char(sysdate , 'D') +1)) as date2,
+      trunc(sysdate) - ((to_char(sysdate , 'D'))) as date3,
+      trunc(sysdate) - ((to_char(sysdate , 'D') +14)) as date4    
+      
+    
+--       '04-Aug-2012' as date1,
+--        '10-Aug-2012' as date2,
+--        '11-Aug-2012' as date3,
+--        '28-Jul-2012' as date4
+    from dual    
+```
 Again, please note, these are non-functional and have been purposefully damaged, but are basically here in an attempt to demonstrate the problems I commonly addressed and solved using query code.
