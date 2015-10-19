@@ -20,6 +20,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
   5. [Getting and Cleaning Data project](https://github.com/andrea345/Getting-Cleaning-Data-Project)
   6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
 
-7.[Sample of first python project - a typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python)
+7.[Sample of first python project - a typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python/blob/master/README.md)
 
 
