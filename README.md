@@ -21,5 +21,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
   6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
 
 7.[Sample of first python project - a typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python/blob/master/README.md)
+8.[Business Plan with webscraped analytics of pricing distribution](https://github.com/andrea345/TheDancingDog/blob/master/README.md)
 
 
