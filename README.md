@@ -22,6 +22,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
 
 7.[Sample of first python project - a typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python/blob/master/README.md)
 
-8.[Analytics of webscraped data for pricing distribution and classification system to be used in the creation of a business plan](https://github.com/andrea345/TheDancingDog/blob/master/README.md)
+8.[Analytics and visualizations of webscraped data for a pricing distribution and a classification system to be used in the creation of a business plan](https://github.com/andrea345/TheDancingDog/blob/master/README.md)
 
 
