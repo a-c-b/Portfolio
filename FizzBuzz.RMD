@@ -1,0 +1,202 @@
+---
+title: "FizzBuzz and Other Coding Interview Examples"
+author: "Andrea Brice"
+date: "Sunday, December 13, 2015"
+output: html_document
+---
+#Introduction
+The following are code I've written in response to the realities of technical coding questions of flavor basic "can you program questions.""  I am not a computer programmer, I am a performance / network engineer who works in analytics / data science.  I do write code to be a programmer, but to answer working business problems.  I will not do well in a "coding" interview.  But then, if you're looking for a computer programmer, you should not be interviewing me in the first place.  However, if you want an engineer who works with complex systems, networks, and very big problems who can use programming or query languages to solve those problems, then I would be a person of interest.
+
+So, I'm quite familiar with looping logic, branching and nested if/then logic, boolean logic and general ideas such as what functions are, or data dictionaries, data types, etc.  My primary "languages" are query languages like ANSI SQL and all the variants (Hive, Oracle, T-, Teradata, MySQL, etc.)  I have worked with the statistical language and packages of R, but have added Python to the list as well.
+
+[My Portfolio index can be found here](https://github.com/andrea345/Portfolio/blob/master/README.md) and that will have further examples of other languages and analytic problems I can publically share.
+
+Because it is easy to "get rusty" if you don't use a language, tracking my code via github helps me to look up my syntax and logic quite quickly.  Since moving to python, I've been trying to collect and code by myself those "interview" questions which are supposed to indicate whether or not someone can write code.
+
+But to quote Zed Shaw, ["What I discovered after this journey of learning is that it's not the languages that matter but what you do with them."](http://learnpythonthehardway.org/book/advice.html) and as an engineer who's worked with some of the worlds most complex, fastest growing networks, I've used coding to keep up.  I've used it as a "secret weapon" in my profession as a network engineer to answer questions which finally grew into a topic called "data science."  
+
+So the code I write is not neat, but it is well documented.  There are probably more expeditious was to go about the work.  I'd love to see those examples so I can collect the snippets in my "kewl code" file.  This file, however, is where I've collected the python code to track those interview questions ["designed to help filter out the 99.5% of programming job candidates who can't seem to program their way out of a wet paper bag."](http://c2.com/cgi/wiki?FizzBuzzTest)
+
+Still, as rude as that commentary is, these are good exercises for me to build additional skills, reinforce my syntax, add bells and whistles, and learn new algorithms.  
+
+
+## Coding Examples:
+
+### [The FizzBuzz Test](http://c2.com/cgi/wiki?FizzBuzzTest)
+#### The language used is python
+```python 
+print """Write a program that prints the numbers from 1 to 100.
+But for multiples of three print ???Fizz??? instead of the number
+and for the multiples of five print ???Buzz???.
+For numbers which are multiples of both three and five print ???FizzBuzz???.
+
+Hit RETURN to continue, CTRL-C to abort.
+"""
+
+raw_input()
+
+i = 1
+while i < 101:
+        if i % 15 == 0:
+		print i, 
+		print "FizzBuzz"  # 1st element to check will be division by 15
+	elif i %3 == 0:
+		print i, 
+		print "???Fizz???"
+	elif i % 5 == 0:
+		print i,
+		print "???Buzz???"
+	else:
+		print i
+		
+	i = i+1
+
+```
+The output looks like:
+
+```ascii
+Write a program that prints the numb
+But for multiples of three print ???
+and for the multiples of five print
+For numbers which are multiples of b
+
+Hit RETURN to continue, CTRL-C to ab
+
+
+1
+2
+3 ???Fizz???
+4
+5 ???Buzz???
+6 ???Fizz???
+7
+8
+9 ???Fizz???
+10 ???Buzz???
+11
+12 ???Fizz???
+13
+14
+15 FizzBuzz
+16
+17
+18 ???Fizz???
+19
+20 ???Buzz???
+21 ???Fizz???
+22
+23
+24 ???Fizz???
+25 ???Buzz???
+26
+27 ???Fizz???
+28
+29
+30 FizzBuzz
+31
+32
+33 ???Fizz???
+34
+35 ???Buzz???
+36 ???Fizz???
+37
+38
+39 ???Fizz???
+40 ???Buzz???
+41
+42 ???Fizz???
+43
+44
+45 FizzBuzz
+46
+47
+48 ???Fizz???
+49
+50 ???Buzz???
+51 ???Fizz???
+52
+53
+54 ???Fizz???
+55 ???Buzz???
+56
+57 ???Fizz???
+58
+59
+60 FizzBuzz
+61
+62
+63 ???Fizz???
+64
+65 ???Buzz???
+66 ???Fizz???
+67
+68
+69 ???Fizz???
+70 ???Buzz???
+71
+72 ???Fizz???
+73
+74
+75 FizzBuzz
+76
+77
+78 ???Fizz???
+79
+80 ???Buzz???
+81 ???Fizz???
+82
+83
+84 ???Fizz???
+85 ???Buzz???
+86
+87 ???Fizz???
+88
+89
+90 FizzBuzz
+91
+92
+93 ???Fizz???
+94
+95 ???Buzz???
+96 ???Fizz???
+97
+98
+99 ???Fizz???
+100 ???Buzz???
+```
+### The Fibonacci Sequence
+#### The languge used in python
+```python
+## Honestly, it wasn't until I found a clear example of code that I finally understood
+## how a Fibonacci sequence was generated.  
+## I'm rewriting the code in my own logic, but have validated against the sets
+## on wikipedia.
+
+
+print "\n The set will start at F0= 0 and F1 = 1."
+s1 = raw_input("What is the highest input you'd like to test up to for the first Fibonacci series?  ")
+s1 = int(s1)
+
+FibList = [0,1] #define the list - this is hard coded with the start calculation at F2
+n = 2 #set the seed start at F2 because F0 and F1 are already defined
+a = b = 1 #set the original parameters
+
+while n <= s1:
+        c = a+b #calculate the next Fib number
+	FibList.append(c) # add it to the list
+	a = b
+	b = c
+	n = n+1
+
+print FibList
+```
+The output looks like:
+
+```ascii
+The set will start at F0= 0 and F1 = 1.
+What is the highest input you'd like to test up to for the first Fibonacci series?  20
+[0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946]
+
+```
+
+
