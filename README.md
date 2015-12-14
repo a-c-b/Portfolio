@@ -22,6 +22,7 @@ This repo is created to organize a variety of Markdown files which consist of fu
   6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
 
 7. Sample of Python code
+
   1.[Determining a box size - fractions and decimal conversions - typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python/blob/master/README.md)
   2. FizzBuzz example and other basic algorithm examples
   3. Python code from the exercises found in the Zed Shaw book, [_Python the Hard Way_](https://github.com/andrea345/PythonTheHardWay)
