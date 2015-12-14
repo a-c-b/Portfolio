@@ -24,7 +24,7 @@ This repo is created to organize a variety of Markdown files which consist of fu
 7. Sample of Python code
 
   1.[Determining a box size - fractions and decimal conversions - typesetting exercise for Letterpress printing](https://github.com/andrea345/box_program_python/blob/master/README.md)
-  2. FizzBuzz example and other basic algorithm examples
+  2. [FizzBuzz example and other basic algorithm examples](https://github.com/andrea345/Portfolio/blob/master/FizzBuzz.RMD)
   3. Python code from the exercises found in the Zed Shaw book, [_Python the Hard Way_](https://github.com/andrea345/PythonTheHardWay)
 
 8.[Analytics and visualizations of webscraped data for a pricing distribution and a classification system to be used in the creation of a business plan](https://github.com/andrea345/TheDancingDog/blob/master/README.md)
