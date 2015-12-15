@@ -1,0 +1,10 @@
+---
+title: "Create MySQL Database"
+author: "Andrea"
+date: "Monday, December 14, 2015"
+output: html_document
+---
+## Introduction
+While my background is primarily working with either Oracle or T-SQL databases, MySQL is also an important variant.  It is also open source and I'm in a "use it or lose it" position.  So, to keep my query syntax relatively fresh, I've loaded MySQL onto my machine and am working with some datasets to generate queries.
+
+
