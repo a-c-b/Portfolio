@@ -9,11 +9,11 @@ While my background is primarily working with either Oracle or T-SQL databases, 
 
 The steps in the process I went through to analyze my response to the small case study were:
 
-1)  Identify and download an open source database for a Windows 10 machine
-2)  Build and then start a database instance
-3)  Build tables in the new database
-4)  Add data to the new tables
-5)  Write queries to answer the questions
+1.  Identify and download an open source database for a Windows 10 machine
+2.  Build and then start a database instance
+3.  Build tables in the new database
+4.  Add data to the new tables
+5.  Write queries to answer the questions
 
 ### Download the database software
 
