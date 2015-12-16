@@ -192,20 +192,81 @@ VALUES
 <blockquote>
 <p>To begin with the client would like to know the number of sites that have completed a rating event? Please show us what SQL query you would write to return this information.</p>
 </blockquote>
-<pre class="sql"><code>select count(distinct site_id) as site_completed
+<pre class="sql"><code>select 
+        count(distinct site_id) as site_completed
 from siteratingsevents
 where Quality_Rating is not null</code></pre>
+<p>or</p>
+<pre class="sql"><code>select 
+        count(distinct site_id) as rating_recd_ct
+from siteratingsevents
+where date_rating_received is not null</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">site_completed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2</td>
+</tr>
+</tbody>
+</table>
+<p>There are a variety of ways to query this, I’m just not sure where a null will show up or what a non-response would look like.</p>
 </div>
-</div>
-<div id="site_completed" class="section level2">
-<h2>site_completed</h2>
-<p>2</p>
 <div id="question-2" class="section level3">
 <h3>Question #2</h3>
 <blockquote>
 <p>The client now informs you that some of the sites that had been rated have now dropped out of the program. They provide you with the following table (SiteStatus). They would like to know how many active sites have completed the rating process?</p>
 </blockquote>
-<p>MySQL does not support the WITH statement - what I returned in my response, so I’ll need to rework the query.</p>
+<p><a href="http://stackoverflow.com/questions/324935/mysql-with-clause">MySQL does not support the WITH statement</a> - what I returned in my response, so I’ll need to rework the query.</p>
+<pre class="mysql"><code>select count(distinct a.site_id) as completed_site from 
+(select distinct site_id as site_id from siteratingsevents where date_rating_received is not null) as a
+right join 
+(select site_id from sitestatus where active = 'YES') as b
+on a.site_id = b.site_id
+group by a.site_id</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">completed_site</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="question-3" class="section level3">
+<h3>Question #3</h3>
+<p>Now the client would like to know how many sites are at each rating level?</p>
+<pre class="mysql"><code>select 
+        quality_rating as rating_level, 
+    count(distinct site_id) as site_ct 
+from siteratingsevents
+group by quality_rating
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">rating_level</th>
+<th align="left">site_ct</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">33</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

@@ -5,15 +5,15 @@ date: "Monday, December 14, 2015"
 output: html_document
 ---
 ## Introduction
-While my background is primarily working with either Oracle or T-SQL databases, MySQL is also an important variant.  
+While my background is primarily working with either Oracle or T-SQL databases, MySQL is also an important variant.  I've taken some simple questions from a quick technical case study I received as the point of departure for this small project in which I will create a MySQL database, tables, and queries.  
 
-I was asked to build some simple queries, for a technical interview.  This outlines the process I went through to 
+The steps in the process I went through to analyze my response to the small case study were:
 
-1)  Identify and download an important open source database for a Windows 10 machine
+1)  Identify and download an open source database for a Windows 10 machine
 2)  Build and then start a database instance
 3)  Build tables in the new database
 4)  Add data to the new tables
-5)  And then I will check my answers for my rough draft queries and put the correct answer down, if I find errors.
+5)  Write queries to answer the questions
 
 ### Download the database software
 
@@ -38,7 +38,7 @@ I was given two tables to work with in the assignment.
 **SiteRatingsEvents**
 
 Site ID   |     Quality Rating	|Rating Type	                |Date Rating Received
-----------|---------------------|-------------------------------|------
+----------|---------------------|-------------------------------|--------------------
 27376	  |      2	        |Initial Rating	                |3/12/2014
 27376	  |      3	        |Deficiency Area Re-Rating	|11/12/2014
 54415     |	 2	        |Initial Rating	                |6/27/2014
@@ -113,15 +113,55 @@ VALUES
 ###Question #1
 >To begin with the client would like to know the number of sites that have completed a rating event? Please show us what SQL query you would write to return this information.
 ```sql
-select count(distinct site_id) as site_completed
+select 
+        count(distinct site_id) as site_completed
 from siteratingsevents
 where Quality_Rating is not null
 ```
-site_completed
---------------
-2
+or
+```sql
+select 
+        count(distinct site_id) as rating_recd_ct
+from siteratingsevents
+where date_rating_received is not null
+```
+|site_completed|
+|--------------|
+|2             |
+
+There are a variety of ways to query this, I'm just not sure where a null will show up or what a non-response would look like.
 
 ###Question #2
 >The client now informs you that some of the sites that had been rated have now dropped out of the program. They provide you with the following table (SiteStatus). They would like to know how many active sites have completed the rating process? 
 
-MySQL does not support the WITH statement - what I returned in my response, so I'll need to rework the query.
+[MySQL does not support the WITH statement](http://stackoverflow.com/questions/324935/mysql-with-clause) - what I returned in my response, so I'll need to rework the query.
+```mysql
+select count(distinct a.site_id) as completed_site from 
+(select distinct site_id as site_id from siteratingsevents where date_rating_received is not null) as a
+right join 
+(select site_id from sitestatus where active = 'YES') as b
+on a.site_id = b.site_id
+group by a.site_id
+```
+|completed_site| 
+|--------------| 
+|1             | 
+
+###Question #3
+Now the client would like to know how many sites are at each rating level?
+```mysql
+select 
+        quality_rating as rating_level, 
+	count(distinct site_id) as site_ct 
+from siteratingsevents
+group by quality_rating
+
+```
+rating_level    |site_ct|
+----------------|-------|
+2               | 2     |
+33              | 1     |
+
+
+
+
