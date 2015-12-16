@@ -28,7 +28,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
   3. Python code from the exercises found in the Zed Shaw book, [_Python the Hard Way_](https://github.com/andrea345/PythonTheHardWay)
 
 8.[Analytics and visualizations of webscraped data for a pricing distribution and a classification system to be used in the creation of a business plan](https://github.com/andrea345/TheDancingDog/blob/master/README.md)
-
-9. [MySQL database build, table adds, and queries](https://github.com/andrea345/Portfolio/blob/master/MySQL.RMD)
+9.[MySQL database build, table adds, and queries](https://github.com/andrea345/Portfolio/blob/master/MySQL.RMD)
 
 
