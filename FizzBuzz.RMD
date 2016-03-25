@@ -1,6 +1,6 @@
 ---
 title: "FizzBuzz and Other Coding Interview Examples"
-author: "Andrea Brice"
+author: "A.C. Brice"
 date: "Sunday, December 13, 2015"
 output: html_document
 ---
