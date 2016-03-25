@@ -1,6 +1,6 @@
 ---
 title: "Documenting Metrics Code in Oracle 12 databases"
-author: "Andrea Brice"
+author: "A.C. Brice"
 date: "Tuesday, May 05, 2015"
 ---
 #  Purpose
