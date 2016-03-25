@@ -1,6 +1,6 @@
 ---
 title: "Create MySQL Database"
-author: "Andrea Brice"
+author: "A.C. Brice"
 date: "Monday, December 14, 2015"
 output: html_document
 ---
