@@ -1,6 +1,6 @@
 ---
 title: "SQL query examples"
-author: "Andrea Brice"
+author: "A.C. Brice"
 date: "Tuesday, May 19, 2015"
 
 ---
