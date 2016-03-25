@@ -1,6 +1,6 @@
 ---
 title: "T SQL examples"
-author: "Andrea Brice"
+author: "A.C. Brice"
 date: "Monday, May 25, 2015"
 output: html_document
 ---
