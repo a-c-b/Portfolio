@@ -31,4 +31,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
 
 9.[MySQL database build, table adds, and queries](https://github.com/andrea345/Portfolio/blob/master/MySQL.RMD)
 
+10.[PowerBI visualization](https://github.com/a-c-b/PowerBI/blob/master/README.md)
+
 
