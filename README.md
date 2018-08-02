@@ -12,7 +12,7 @@ This repo is created to organize a variety of Markdown files which consist of fu
 
 5.  [Sample of Visual Basic](https://github.com/andrea345/Portfolio/blob/master/Visual%20Basic.rmd)
 
-6. Sample of R code and knowledge of Markdown
+6. [Sample of R code and knowledge of Markdown] (https://github.com/a-c-b/Regression-Project
 
   1. [NOAA Storm Data - MarkDown file](https://github.com/andrea345/NOAA-Storm-Data).
   2. [NOAA Storm Data html file on RPubs](http://rpubs.com/andrea345/Storm_Data).
@@ -21,7 +21,7 @@ This repo is created to organize a variety of Markdown files which consist of fu
   5. [Getting and Cleaning Data project](https://github.com/andrea345/Getting-Cleaning-Data-Project)
   6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
 
-7. Sample of Python code
+7. [Sample of Python code] (https://github.com/a-c-b/box_program_python)
 
   1. [A fractions and decimal conversion and Layout exercises](https://github.com/andrea345/box_program_python/blob/master/README.md)
   2. [FizzBuzz example and other basic algorithm examples](https://github.com/andrea345/Portfolio/blob/master/FizzBuzz.RMD)
