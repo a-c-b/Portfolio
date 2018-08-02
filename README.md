@@ -22,7 +22,7 @@ This repo is created to organize a variety of Markdown files which consist of fu
     6. [R code, graphing, and embedded images](https://github.com/andrea345/ExData_Plotting1)
     7. [Census Geocoder](https://github.com/a-c-b/Census-Geocoder)
 
-7. [Sample of Python code](https://github.com/a-c-b/box_program_python)
+7. Samples of Python code:
 
     1. [A fractions and decimal conversion and Layout exercises](https://github.com/andrea345/box_program_python/blob/master/README.md)
     2. [FizzBuzz example and other basic algorithm examples](https://github.com/andrea345/Portfolio/blob/master/FizzBuzz.RMD)
