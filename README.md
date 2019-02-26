@@ -36,4 +36,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
 
 11.[Tableau visualizations](https://public.tableau.com/profile/vizzyddg#!/)
 
+12.[Postgres 11 text search](https://raw.githubusercontent.com/a-c-b/Portfolio/master/Postgres)
+
 
