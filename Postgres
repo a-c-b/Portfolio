@@ -1,0 +1,57 @@
+# Text searching and model testing / results
+
+This code is off a Postgres 11 database. Its purpose is to test the results of a cleaned group of key words
+of a model of products for an organic search. Because the simple Postgres text searches were returning too many
+false positives, additional logic using the Levenshtein distance was applied. In addition, the search results were
+further tuned to remove additional false positives. The result is used for testing new model logic, so the actual
+measurement results are part of the output for analysis.
+
+with 
+ 	first_grab as (	
+		select  	    	
+			-- search for the search phrase within the new keywurds
+			ts_rank(to_tsvector('english_nostop', keywurds),to_tsquery('english_nostop',replace('TestSearchPhrase',' ','&'))) as srchres,  	    	
+  	    	/* 
+ 	    	 check if brand match can be found. If found, then perfect Levenshtein distance = 0
+ 	    	 	lower lev distance, the closer the words are.Which is why we want to overwrite an actual Lev. result
+ 	    		if we compare it to the phrase b/c the more time a letter or a word is repeated, the closer it will be.
+ 	    	
+ 	    		The logic here is to check to see if a phrase is within an array of lexemes. If that is true, then 
+ 	    		a brand name, or a word = a brand name is found and Levenshtein = 0 or a perfect match.
+ 	    	*/
+ 	    	case when plainto_tsquery(v1brand) <@ plainto_tsquery('TestSearchPhrase') = 'true' then 0 else     	
+ 	    	levenshtein(left(v1brand,255), 'TestSearchPhrase') end	as levbrand,
+ 	    	-- check if manufacturer  match can be found. If found, then perfect Levenshtein distance = 0
+ 	    	case when plainto_tsquery(v1mfr) <@ plainto_tsquery('TestSearchPhrase') = 'true' then 0 else 
+ 	    		levenshtein(left(v1mfr,255), 'TestSearchPhrase') end as levmfr,
+ 	    	to_tsvector('english_nostop', keywurds) as keywurdvec,
+ 	    	to_tsvector('english_nostop', 'TestSearchPhrase') as phrasevec,
+ 	    	plainto_tsquery('english_nostop',keywurds) as keywurdquery,
+ 	    	plainto_tsquery('english_nostop','TestSearchPhrase') as phrasequery,
+ 	    	vizzy.v_createm2.*
+ 		from vizzy.v_createm2
+ 		ORDER BY srchres desc
+ 		LIMIT 100
+ 		) 	
+ 		,level2 as (
+	 		select  		
+		 		keywurds
+		 		,keywurdvec, phrasevec
+		 		,keywurdquery,phrasequery
+		 		,srchres, levbrand, levmfr, 
+		 		-- multiplying the Lev results for brand & mfr
+		 		levbrand*levmfr as levresult
+		 		,keyfield, v2prodname, origprodname, v1brand, v1mfr
+			from first_grab 
+			where srchres > 0.00000000000000000000999999969
+	 		)	 
+		select 
+		 	row_number() over (order by levresult, srchres desc) as sort_result
+			,srchres,levbrand,levmfr,levresult
+			-- compare these two when trying to find rank diff
+			,keywurdvec,phrasequery
+			--,phrasevec--,keywurdquery			
+			,v2prodname,origprodname,v1brand,v1mfr
+		 	,keywurds,keyfield
+	 	from level2
+		order by sort_result
