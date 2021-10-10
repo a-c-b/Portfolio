@@ -38,4 +38,6 @@ This repo is created to organize a variety of Markdown files which consist of fu
 
 12.[Postgres 11 text search](https://raw.githubusercontent.com/a-c-b/Portfolio/master/Postgres)
 
+13.[Edgar 10K 10Q data pipeline](https://github.com/a-c-b/Edgar10K10Q/blob/main/README.md)
+
 
